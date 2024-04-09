@@ -4,7 +4,7 @@
     "exactOptionalPropertyTypes": true
   },
   "tasks": {
-    "dev": "deno run --watch --check --allow-net --allow-read --allow-env ./dev.ts",
+    "dev": "deno run --watch --check --allow-net --allow-read --allow-env --allow-write ./dev.ts",
     "build": "npm run clean && tsc",
     "lint": "deno lint"
   }

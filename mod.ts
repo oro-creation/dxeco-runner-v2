@@ -2,6 +2,7 @@ import { bundle } from "https://deno.land/x/emit@0.38.3/mod.ts";
 import { delay } from "jsr:@std/async";
 import { encodeBase64Url } from "jsr:@std/encoding/base64url";
 import { getLogger } from "jsr:@std/log";
+import { join } from "jsr:@std/path";
 import axios from "npm:axios";
 
 export async function runner(
@@ -127,9 +128,13 @@ export async function runner(
             throw new Error("Runnable code not found");
           }
 
+          const dirPath = await Deno.makeTempDir();
+
+          const runnableCodePath = join(dirPath, "mod.ts");
+          await Deno.writeTextFile(runnableCodePath, job.runnableCode);
+
           logger.info(`code: ${job.runnableCode}`);
-          const bundled = (await bundle(createDataUrl(job.runnableCode), {}))
-            .code;
+          const bundled = (await bundle(runnableCodePath)).code;
           logger.info(`Runnable code bundled: ${bundled}`);
 
           blobUrl = URL.createObjectURL(
@@ -145,13 +150,19 @@ export async function runner(
           // const result = await import(blobUrl);
           logger.info(`Runnable code imported: ${worker}`);
 
-          // await api.put(`/runner-jobs/${job.id}`, {
-          //   id: job.id,
-          //   status: "Done",
-          //   result,
-          // });
+          worker.onmessage = async (e) => {
+            logger.info(`Worker message: ${e.data}`);
 
-          // logger.info(`Job done: ${job.id}`);
+            await api.put(`/runner-jobs/${job.id}`, {
+              id: job.id,
+              status: "Done",
+              result: e.data,
+            });
+
+            logger.info(`Job done: ${job.id}`);
+          };
+
+          worker.postMessage(undefined);
         } catch (e) {
           if (blobUrl) {
             URL.revokeObjectURL(blobUrl);
