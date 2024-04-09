@@ -203,45 +203,47 @@ const executeJavaScriptInWorker = <T>(
   }>
 ) =>
   new Promise<T>((resolve, reject) => {
-    let blobUrl: string | undefined;
-    try {
-      blobUrl = URL.createObjectURL(
-        new Blob([props.javaScriptBundledCode], {
-          type: "text/javascript",
-        })
-      );
+    const blobUrl = URL.createObjectURL(
+      new Blob([props.javaScriptBundledCode], {
+        type: "text/javascript",
+      })
+    );
 
-      const worker = new Worker(import.meta.resolve(blobUrl), {
-        type: "module",
-      });
+    const worker = new Worker(import.meta.resolve(blobUrl), {
+      type: "module",
+    });
 
-      props.logger.info(`Runnable code imported: ${worker}`);
+    worker.onmessage = (e) => {
+      props.logger.info(`Job done ${e.data}`);
 
-      const controller = new AbortController();
-
-      delay(props.timeout, { signal: controller.signal }).then(() => {
-        worker.terminate();
-        reject(new Error("Timeout"));
-      });
-
-      worker.onmessage = (e) => {
-        props.logger.info(`Job done ${e.data}`);
-        controller.abort();
-        resolve(e.data);
-      };
-      worker.onerror = (e) => {
-        props.logger.error(`Job error: ${e}`);
-        controller.abort();
-        reject(e);
-      };
-
-      worker.postMessage({});
-    } catch (e) {
-      props.logger.error(`Job error: ${e}`);
-      reject(e);
-    } finally {
+      clearTimeout(timeoutId);
+      worker.terminate();
       if (blobUrl) {
         URL.revokeObjectURL(blobUrl);
       }
-    }
+
+      resolve(e.data);
+    };
+    worker.onerror = (e) => {
+      props.logger.error(`Job error: ${e}`);
+
+      clearTimeout(timeoutId);
+      worker.terminate();
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+
+      reject(e);
+    };
+
+    worker.postMessage({});
+
+    const timeoutId = setTimeout(() => {
+      worker.terminate();
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+
+      reject(new Error("Timeout"));
+    }, props.timeout);
   });
