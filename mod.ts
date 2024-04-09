@@ -1,7 +1,8 @@
-import axios from "npm:axios";
-import { getLogger } from "jsr:@std/log";
 import { bundle } from "https://deno.land/x/emit@0.38.3/mod.ts";
 import { delay } from "jsr:@std/async";
+import { encodeBase64Url } from "jsr:@std/encoding/base64url";
+import { getLogger } from "jsr:@std/log";
+import axios from "npm:axios";
 
 export async function runner(
   props: Readonly<{
@@ -126,25 +127,17 @@ export async function runner(
             throw new Error("Runnable code not found");
           }
 
-          // const tempDirPath = await Deno.makeTempDir();
-          // logger.info(`Temp dir created: ${tempDirPath}`);
-
-          // throw new Error("Not implemented");
-          // const command = new Deno.Command(Deno.execPath(), {
-          //   args: ["run", "--allow-net", "-r", job.runnableCode],
-          // });
-
-          // await command.output();
-
-          // logger.info(`code: ${job.runnableCode}`);
-          // const bundled = (await bundle(job.runnableCode, {})).code;
-          // logger.info(`Runnable code bundled: ${job.runnableCode}`);
+          logger.info(`code: ${job.runnableCode}`);
+          const bundled = (await bundle(createDataUrl(job.runnableCode), {}))
+            .code;
+          logger.info(`Runnable code bundled: ${bundled}`);
 
           blobUrl = URL.createObjectURL(
-            new Blob([job.runnableCode], {
+            new Blob([bundled], {
               type: "text/javascript",
             })
           );
+
           const worker = new Worker(import.meta.resolve(blobUrl), {
             type: "module",
           });
@@ -185,4 +178,8 @@ export async function runner(
       logger.error(`${e.message}\n${e.stack}`);
     }
   }
+}
+
+function createDataUrl(code: string): string {
+  return `data:;base64,${encodeBase64Url(code)}`;
 }
