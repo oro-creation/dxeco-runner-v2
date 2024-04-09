@@ -1,7 +1,6 @@
 import { bundle } from "https://deno.land/x/emit@0.38.3/mod.ts";
 import { delay } from "jsr:@std/async";
-import { encodeBase64Url } from "jsr:@std/encoding/base64url";
-import { getLogger } from "jsr:@std/log";
+import { Logger, getLogger } from "jsr:@std/log";
 import { join } from "jsr:@std/path";
 import axios from "npm:axios";
 
@@ -25,6 +24,11 @@ export async function runner(
      * @default 30000
      */
     interval?: number;
+    /**
+     * timeout
+     * @default 30000
+     */
+    timeout?: number;
   }>
 ) {
   const logger = getLogger();
@@ -34,6 +38,7 @@ export async function runner(
     apiKey,
     apiUrl = "https://api.dxeco.io/api",
     interval = 30000,
+    timeout = 30000,
   } = props;
 
   try {
@@ -120,7 +125,6 @@ export async function runner(
       }
 
       for (const job of jobs) {
-        let blobUrl: string | undefined;
         try {
           logger.info(`Job started: ${job.id}`);
 
@@ -137,36 +141,18 @@ export async function runner(
           const bundled = (await bundle(runnableCodePath)).code;
           logger.info(`Runnable code bundled: ${bundled}`);
 
-          blobUrl = URL.createObjectURL(
-            new Blob([bundled], {
-              type: "text/javascript",
-            })
-          );
-
-          const worker = new Worker(import.meta.resolve(blobUrl), {
-            type: "module",
+          const result = await executeJavaScriptInWorker({
+            code: bundled,
+            timeout,
+            logger: getLogger(`job-${job.id}`),
           });
 
-          // const result = await import(blobUrl);
-          logger.info(`Runnable code imported: ${worker}`);
-
-          worker.onmessage = async (e) => {
-            logger.info(`Worker message: ${e.data}`);
-
-            await api.put(`/runner-jobs/${job.id}`, {
-              id: job.id,
-              status: "Done",
-              result: e.data,
-            });
-
-            logger.info(`Job done: ${job.id}`);
-          };
-
-          worker.postMessage(undefined);
+          await api.put(`/runner-jobs/${job.id}`, {
+            id: job.id,
+            status: "Done",
+            result,
+          });
         } catch (e) {
-          if (blobUrl) {
-            URL.revokeObjectURL(blobUrl);
-          }
           logger.error(`Job error: ${e}`);
           if (e instanceof Error) {
             logger.info(`Job error: ${e.message}`);
@@ -191,6 +177,49 @@ export async function runner(
   }
 }
 
-function createDataUrl(code: string): string {
-  return `data:;base64,${encodeBase64Url(code)}`;
-}
+const executeJavaScriptInWorker = <T>(
+  props: Readonly<{
+    code: string;
+    timeout: number;
+    logger: Logger;
+  }>
+) =>
+  new Promise<T>((resolve, reject) => {
+    let blobUrl: string | undefined;
+    try {
+      blobUrl = URL.createObjectURL(
+        new Blob([props.code], {
+          type: "text/javascript",
+        })
+      );
+
+      const worker = new Worker(import.meta.resolve(blobUrl), {
+        type: "module",
+      });
+
+      props.logger.info(`Runnable code imported: ${worker}`);
+
+      worker.onmessage = (e) => {
+        props.logger.info(`Job done ${e.data}`);
+        resolve(e.data);
+      };
+      worker.onerror = (e) => {
+        props.logger.error(`Job error: ${e}`);
+        reject(e);
+      };
+
+      delay(props.timeout).then(() => {
+        worker.terminate();
+        reject(new Error("Timeout"));
+      });
+
+      worker.postMessage({});
+    } catch (e) {
+      props.logger.error(`Job error: ${e}`);
+      reject(e);
+    } finally {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    }
+  });
