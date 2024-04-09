@@ -2,7 +2,13 @@ import { bundle } from "https://deno.land/x/emit@0.38.3/mod.ts";
 import { delay } from "jsr:@std/async";
 import { Logger, getLogger } from "jsr:@std/log";
 import { join } from "jsr:@std/path";
-import axios from "npm:axios";
+import {
+  activateRunner,
+  getCurrentUser,
+  getRunnerJobs,
+  registerRunner,
+  updateRunnerJob,
+} from "./api.ts";
 
 export async function runner(
   props: Readonly<{
@@ -18,7 +24,7 @@ export async function runner(
      * API URL
      * @default https://api.dxeco.io/api
      */
-    apiUrl?: string;
+    apiUrl?: URL;
     /**
      * Jobs polling interval
      * @default 30000
@@ -36,7 +42,7 @@ export async function runner(
   const {
     name,
     apiKey,
-    apiUrl = "https://api.dxeco.io/api",
+    apiUrl = new URL("https://api.dxeco.io/api"),
     interval = 30000,
     timeout = 30000,
   } = props;
@@ -44,28 +50,12 @@ export async function runner(
   try {
     logger.info("Starting dxeco-runner...");
 
-    // Preparing API client
-    const api = axios.create({
-      baseURL: apiUrl,
-      headers: {
-        "X-API-Key": apiKey,
-      },
-    });
-
-    // Get my user context
-    const {
-      data: { organizationId },
-    } = await api.get<{
-      id: string;
-      organizationId: string;
-    }>("/auth/current-user");
+    const { organizationId } = await getCurrentUser({ apiKey, apiUrl });
 
     // Register as a runner
-    const {
-      data: { id: runnerId },
-    } = await api.post<{
-      id: string;
-    }>("/runners/register", {
+    const { id: runnerId } = await registerRunner({
+      apiUrl,
+      apiKey,
       organizationId,
       name,
     });
@@ -75,10 +65,10 @@ export async function runner(
     // Activate every 30 seconds
     setInterval(async () => {
       try {
-        await api.post<{
-          id: string;
-        }>(`/runners/${runnerId}/activate`, {
-          id: runnerId,
+        await activateRunner({
+          apiUrl,
+          apiKey,
+          runnerId,
         });
       } catch (e) {
         if (e instanceof Error) {
@@ -93,21 +83,11 @@ export async function runner(
     do {
       const jobs = await (async () => {
         try {
-          const {
-            data: { data: jobs },
-          } = await api.get<{
-            data: Array<{
-              id: string;
-              status: string;
-              runnableCode?: string;
-            }>;
-          }>("/runner-jobs", {
-            params: {
-              organizationId,
-              runnerId,
-              type: "CustomAccountIntegration",
-              status: "Active",
-            },
+          const { data: jobs } = await getRunnerJobs({
+            apiKey,
+            apiUrl,
+            organizationId,
+            runnerId,
           });
           return jobs;
         } catch (e) {
@@ -138,18 +118,31 @@ export async function runner(
             logger: getLogger(`job-${job.id}`),
           });
 
-          await api.put(`/runner-jobs/${job.id}`, {
-            id: job.id,
+          await updateRunnerJob({
+            apiUrl,
+            apiKey,
+            jobId: job.id,
             status: "Done",
             result,
           });
         } catch (e) {
           logger.error(`Job error: ${e}`);
+          if (e instanceof TimeoutError) {
+            await updateRunnerJob({
+              apiUrl,
+              apiKey,
+              jobId: job.id,
+              status: "Timeout",
+            });
+            continue;
+          }
           if (e instanceof Error) {
             logger.info(`Job error: ${e.message}`);
 
-            await api.put(`/runner-jobs/${job.id}`, {
-              id: job.id,
+            await updateRunnerJob({
+              apiUrl,
+              apiKey,
+              jobId: job.id,
               status: "Error",
               errorReason: e.stack,
             });
@@ -244,6 +237,12 @@ const executeJavaScriptInWorker = <T>(
         URL.revokeObjectURL(blobUrl);
       }
 
-      reject(new Error("Timeout"));
+      reject(new TimeoutError());
     }, props.timeout);
   });
+
+export class TimeoutError extends Error {
+  constructor() {
+    super("Timeout");
+  }
+}

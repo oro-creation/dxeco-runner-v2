@@ -1,6 +1,7 @@
 import { assertEquals, assertRejects } from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
-import { executeTypeScriptInWorker } from "./mod.ts";
+import { join } from "jsr:@std/url";
+import { TimeoutError, executeTypeScriptInWorker } from "./mod.ts";
 
 Deno.test("default", async () => {
   const result = await executeTypeScriptInWorker({
@@ -24,7 +25,21 @@ Deno.test("loop", async () => {
         logger: getLogger("loop"),
         timeout: 10000,
       }),
-    Error,
+    TimeoutError,
     "Timeout"
+  );
+});
+
+Deno.test("url base", () => {
+  assertEquals(
+    join(new URL("foo/sub", "https://example.com/api")),
+    new URL("https://example.com/foo/sub")
+  );
+});
+
+Deno.test("url join", () => {
+  assertEquals(
+    join(new URL("https://example.com/api"), "foo/sub"),
+    new URL("https://example.com/api/foo/sub")
   );
 });
