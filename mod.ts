@@ -132,17 +132,8 @@ export async function runner(
             throw new Error("Runnable code not found");
           }
 
-          const dirPath = await Deno.makeTempDir();
-
-          const runnableCodePath = join(dirPath, "mod.ts");
-          await Deno.writeTextFile(runnableCodePath, job.runnableCode);
-
-          logger.info(`code: ${job.runnableCode}`);
-          const bundled = (await bundle(runnableCodePath)).code;
-          logger.info(`Runnable code bundled: ${bundled}`);
-
-          const result = await executeJavaScriptInWorker({
-            code: bundled,
+          const result = await executeTypeScriptInWorker({
+            typeScriptCode: job.runnableCode,
             timeout,
             logger: getLogger(`job-${job.id}`),
           });
@@ -177,9 +168,36 @@ export async function runner(
   }
 }
 
+/**
+ * DenoのTypeScriptコードをWeb Workerで実行します
+ */
+export async function executeTypeScriptInWorker<T>(
+  props: Readonly<{
+    typeScriptCode: string;
+    timeout: number;
+    logger: Logger;
+  }>
+): Promise<T> {
+  const dirPath = await Deno.makeTempDir();
+
+  const runnableCodePath = join(dirPath, "mod.ts");
+  await Deno.writeTextFile(runnableCodePath, props.typeScriptCode);
+
+  const bundled = (await bundle(runnableCodePath)).code;
+
+  return await executeJavaScriptInWorker({
+    javaScriptBundledCode: bundled,
+    timeout: props.timeout,
+    logger: props.logger,
+  });
+}
+
+/**
+ * バンドル済みのJavaScriptコードをWeb Workerで実行します
+ */
 const executeJavaScriptInWorker = <T>(
   props: Readonly<{
-    code: string;
+    javaScriptBundledCode: string;
     timeout: number;
     logger: Logger;
   }>
@@ -188,7 +206,7 @@ const executeJavaScriptInWorker = <T>(
     let blobUrl: string | undefined;
     try {
       blobUrl = URL.createObjectURL(
-        new Blob([props.code], {
+        new Blob([props.javaScriptBundledCode], {
           type: "text/javascript",
         })
       );
@@ -199,19 +217,23 @@ const executeJavaScriptInWorker = <T>(
 
       props.logger.info(`Runnable code imported: ${worker}`);
 
+      const controller = new AbortController();
+
+      delay(props.timeout, { signal: controller.signal }).then(() => {
+        worker.terminate();
+        reject(new Error("Timeout"));
+      });
+
       worker.onmessage = (e) => {
         props.logger.info(`Job done ${e.data}`);
+        controller.abort();
         resolve(e.data);
       };
       worker.onerror = (e) => {
         props.logger.error(`Job error: ${e}`);
+        controller.abort();
         reject(e);
       };
-
-      delay(props.timeout).then(() => {
-        worker.terminate();
-        reject(new Error("Timeout"));
-      });
 
       worker.postMessage({});
     } catch (e) {

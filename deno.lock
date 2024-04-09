@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/assert": "jsr:@std/assert@0.221.0",
       "jsr:@std/assert@^0.221.0": "jsr:@std/assert@0.221.0",
       "jsr:@std/async": "jsr:@std/async@0.221.0",
       "jsr:@std/encoding": "jsr:@std/encoding@0.221.0",
@@ -14,7 +15,10 @@
     },
     "jsr": {
       "@std/assert@0.221.0": {
-        "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
+        "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a",
+        "dependencies": [
+          "jsr:@std/fmt@^0.221.0"
+        ]
       },
       "@std/async@0.221.0": {
         "integrity": "f5519861754a1bb2898d227dd8ccb545abc975534aa9063e53911d6cb4e365cf",
