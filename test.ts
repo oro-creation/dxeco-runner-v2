@@ -65,6 +65,35 @@ Deno.test("fetch", async () => {
   assertEquals(result.id, 1);
 });
 
+Deno.test("npm", async () => {
+  const result = await executeTypeScriptInWorker({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/npm.ts"))
+    ).text(),
+    logger: getLogger("npm"),
+    timeout: 10000,
+    workerName: "npm",
+  });
+
+  assertEquals(result, [
+    ["a", "b", "c"],
+    ["1", "2", "3"],
+  ]);
+});
+
+Deno.test("denoland", async () => {
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/denoland.ts"))
+    ).text(),
+    logger: getLogger("denoland"),
+    timeout: 10000,
+    workerName: "denoland",
+  });
+
+  assertEquals(result[0], "Installation");
+});
+
 Deno.test("url base", () => {
   assertEquals(
     join(new URL("foo/sub", "https://example.com/api")),
