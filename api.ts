@@ -1,5 +1,6 @@
 import { Logger } from "jsr:@std/log";
 import { join } from "jsr:@std/url";
+import axios from "npm:axios";
 
 /**
  * 現在のユーザー情報
@@ -103,21 +104,18 @@ export async function getRunnerJobs(props: {
   }>;
 }> {
   try {
-    const url = join(props.apiUrl, "runner-jobs");
-    url.searchParams.set("organizationId", props.organizationId);
-    url.searchParams.set("runnerId", props.runnerId);
-    url.searchParams.set("type", "CustomAccountIntegration");
-    url.searchParams.set("status", "Active");
-    url.searchParams.set("limit", "-1");
-    const res = await fetch(url, {
+    // なぜか fetch を使うと connection closed before message completed ERRORが出るため axios で代用
+    const res = await axios.get(join(props.apiUrl, "runner-jobs").toString(), {
+      params: {
+        organizationId: props.organizationId,
+        runnerId: props.runnerId,
+        type: "CustomAccountIntegration",
+        status: "Active",
+        limit: -1,
+      },
       headers: { "X-API-Key": props.apiKey },
     });
-    if (!res.ok) {
-      throw new Error(
-        `Failed to get runner jobs: ${res.status} ${await res.text()}`
-      );
-    }
-    return await res.json();
+    return res.data;
   } catch (e) {
     props.logger.error(`Failed to get runner jobs: ${e}`);
     return { data: [] };
