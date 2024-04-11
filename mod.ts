@@ -64,41 +64,25 @@ export async function runner(
 
     // Activate every 30 seconds
     setInterval(async () => {
-      try {
-        await activateRunner({
-          apiUrl,
-          apiKey,
-          runnerId,
-        });
-      } catch (e) {
-        if (e instanceof Error) {
-          logger.error(`Activation failed: ${e.message}\n${e.stack}`);
-        }
-      }
+      await activateRunner({
+        apiUrl,
+        apiKey,
+        runnerId,
+        logger,
+      });
     }, 30000);
 
     logger.info(`Waiting for jobs...`);
 
     // Polls its own jobs every 30 seconds
     do {
-      const jobs = await (async () => {
-        try {
-          const { data: jobs } = await getRunnerJobs({
-            apiKey,
-            apiUrl,
-            organizationId,
-            runnerId,
-          });
-          return jobs;
-        } catch (e) {
-          if (e instanceof Error) {
-            logger.error(
-              `Getting runner-jobs failed: ${e.message}\n${e.stack}`
-            );
-          }
-          return [];
-        }
-      })();
+      const { data: jobs } = await getRunnerJobs({
+        apiKey,
+        apiUrl,
+        organizationId,
+        runnerId,
+        logger,
+      });
 
       if (jobs.length > 0) {
         logger.info(`Jobs found: ${jobs.map((v) => v.id).join(", ")}`);

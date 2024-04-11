@@ -1,3 +1,4 @@
+import { Logger } from "jsr:@std/log";
 import { join } from "jsr:@std/url";
 
 /**
@@ -14,6 +15,11 @@ export async function getCurrentUser(props: {
   const res = await fetch(join(props.apiUrl, "auth", "current-user"), {
     headers: { "X-API-Key": props.apiKey },
   });
+  if (!res.ok) {
+    throw new Error(
+      `Failed to get current user: ${res.status} ${await res.text()}`
+    );
+  }
   return await res.json();
 }
 
@@ -21,14 +27,12 @@ export async function getCurrentUser(props: {
  * ランナー登録
  * @see https://api.dxeco.io/docs#tag/runner/operation/RunnerController_registerRunner
  */
-export async function registerRunner(
-  props: Readonly<{
-    apiUrl: URL;
-    apiKey: string;
-    organizationId: string;
-    name: string;
-  }>
-): Promise<{ id: string }> {
+export async function registerRunner(props: {
+  apiUrl: URL;
+  apiKey: string;
+  organizationId: string;
+  name: string;
+}): Promise<{ id: string }> {
   const res = await fetch(join(props.apiUrl, "runners", "register"), {
     method: "POST",
     headers: {
@@ -40,73 +44,98 @@ export async function registerRunner(
       name: props.name,
     }),
   });
+  if (!res.ok) {
+    throw new Error(
+      `Failed to register runner: ${res.status} ${await res.text()}`
+    );
+  }
   return await res.json();
 }
 
 /**
  * ランナーアクティブ化
+ * エラー発生時はloggerに出力
  * @see https://api.dxeco.io/docs#tag/runner/operation/RunnerController_activateRunner
  */
-export async function activateRunner(
-  props: Readonly<{
-    apiUrl: URL;
-    apiKey: string;
-    runnerId: string;
-  }>
-): Promise<void> {
-  await fetch(join(props.apiUrl, "runners", props.runnerId, "activate"), {
-    method: "POST",
-    headers: {
-      "X-API-Key": props.apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id: props.runnerId }),
-  });
+export async function activateRunner(props: {
+  apiUrl: URL;
+  apiKey: string;
+  runnerId: string;
+  logger: Logger;
+}): Promise<void> {
+  try {
+    const res = await fetch(
+      join(props.apiUrl, "runners", props.runnerId, "activate"),
+      {
+        method: "POST",
+        headers: {
+          "X-API-Key": props.apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: props.runnerId }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(`${res.status} ${await res.text()}`);
+    }
+  } catch (error) {
+    props.logger.error(`Failed to activate runner: ${error}`);
+  }
 }
 
 /**
  * ランナージョブ一覧
+ * エラー発生時は空配列を返し、loggerに出力
  * @see https://api.dxeco.io/docs#tag/runner/operation/RunnerJobController_runnerJobs
  */
-export async function getRunnerJobs(
-  props: Readonly<{
-    apiUrl: URL;
-    apiKey: string;
-    runnerId: string;
-    organizationId: string;
-  }>
-): Promise<{
+export async function getRunnerJobs(props: {
+  apiUrl: URL;
+  apiKey: string;
+  runnerId: string;
+  organizationId: string;
+  logger: Logger;
+}): Promise<{
   data: ReadonlyArray<{
     id: string;
     status: string;
     runnableCode?: string;
   }>;
 }> {
-  const url = join(props.apiUrl, "runner-jobs");
-  url.searchParams.set("organizationId", props.organizationId);
-  url.searchParams.set("runnerId", props.runnerId);
-  url.searchParams.set("type", "CustomAccountIntegration");
-  url.searchParams.set("status", "Active");
-  const res = await fetch(url, {
-    headers: { "X-API-Key": props.apiKey },
-  });
-  return await res.json();
+  try {
+    const url = join(props.apiUrl, "runner-jobs");
+    url.searchParams.set("organizationId", props.organizationId);
+    url.searchParams.set("runnerId", props.runnerId);
+    url.searchParams.set("type", "CustomAccountIntegration");
+    url.searchParams.set("status", "Active");
+    url.searchParams.set("limit", "-1");
+    const res = await fetch(url, {
+      headers: { "X-API-Key": props.apiKey },
+    });
+    if (!res.ok) {
+      throw new Error(
+        `Failed to get runner jobs: ${res.status} ${await res.text()}`
+      );
+    }
+    return await res.json();
+  } catch (e) {
+    props.logger.error(`Failed to get runner jobs: ${e}`);
+    return { data: [] };
+  }
 }
 
 /**
  * ランナージョブ更新
  * @see https://api.dxeco.io/docs#tag/runner/operation/RunnerJobController_updateRunnerJob
  */
-export async function updateRunnerJob(
-  props: Readonly<{
-    apiUrl: URL;
-    apiKey: string;
-    jobId: string;
-    status: "Active" | "Done" | "Error" | "Timeout";
-    errorReason?: string | undefined;
-    result?: unknown;
-  }>
-): Promise<void> {
+export async function updateRunnerJob(props: {
+  apiUrl: URL;
+  apiKey: string;
+  jobId: string;
+  status: "Active" | "Done" | "Error" | "Timeout";
+  errorReason?: string | undefined;
+  result?: unknown;
+}): Promise<void> {
   await fetch(join(props.apiUrl, "runner-jobs", props.jobId), {
     method: "PUT",
     headers: {
