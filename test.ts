@@ -65,14 +65,14 @@ Deno.test("fetch", async () => {
   assertEquals(result.id, 1);
 });
 
-Deno.test("npm", async () => {
+Deno.test("csv", async () => {
   const result = await executeTypeScriptInWorker({
     typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/npm.ts"))
+      await fetch(import.meta.resolve("./example/csv.ts"))
     ).text(),
-    logger: getLogger("npm"),
+    logger: getLogger("csv"),
     timeout: 10000,
-    workerName: "npm",
+    workerName: "csv",
   });
 
   assertEquals(result, [
@@ -81,14 +81,14 @@ Deno.test("npm", async () => {
   ]);
 });
 
-Deno.test("denoland", async () => {
+Deno.test("domParser", async () => {
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/denoland.ts"))
+      await fetch(import.meta.resolve("./example/domParser.ts"))
     ).text(),
-    logger: getLogger("denoland"),
+    logger: getLogger("domParser"),
     timeout: 10000,
-    workerName: "denoland",
+    workerName: "domParser",
   });
 
   assertEquals(result[0], "Installation");

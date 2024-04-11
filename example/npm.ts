@@ -1,4 +1,4 @@
-import { parse } from "npm:csv-parse";
+import { parse } from "https://esm.sh/csv-parse@5.5.5/sync";
 
 onmessage = () => {
   const result = parse(
