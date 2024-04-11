@@ -10,6 +10,7 @@ Deno.test("default", async () => {
     ).text(),
     logger: getLogger("default"),
     timeout: 10000,
+    workerName: "default",
   });
 
   assertEquals(result, [
@@ -28,6 +29,7 @@ Deno.test("loop", async () => {
         ).text(),
         logger: getLogger("loop"),
         timeout: 10000,
+        workerName: "loop",
       }),
     TimeoutError,
     "Timeout"
@@ -43,10 +45,24 @@ Deno.test("throw", async () => {
         ).text(),
         logger: getLogger("throw"),
         timeout: 10000,
+        workerName: "throw",
       }),
     Error,
     "always throw"
   );
+});
+
+Deno.test("fetch", async () => {
+  const result = await executeTypeScriptInWorker<{ id: number }>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/fetch.ts"))
+    ).text(),
+    logger: getLogger("fetch"),
+    timeout: 10000,
+    workerName: "fetch",
+  });
+
+  assertEquals(result.id, 1);
 });
 
 Deno.test("url base", () => {
