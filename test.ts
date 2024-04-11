@@ -5,7 +5,9 @@ import { TimeoutError, executeTypeScriptInWorker } from "./mod.ts";
 
 Deno.test("default", async () => {
   const result = await executeTypeScriptInWorker({
-    typeScriptCode: await Deno.readTextFile("./example/default.ts"),
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/default.ts"))
+    ).text(),
     logger: getLogger("default"),
     timeout: 10000,
   });
@@ -21,12 +23,29 @@ Deno.test("loop", async () => {
   await assertRejects(
     async () =>
       await executeTypeScriptInWorker({
-        typeScriptCode: await Deno.readTextFile("./example/loop.ts"),
+        typeScriptCode: await (
+          await fetch(import.meta.resolve("./example/loop.ts"))
+        ).text(),
         logger: getLogger("loop"),
         timeout: 10000,
       }),
     TimeoutError,
     "Timeout"
+  );
+});
+
+Deno.test("throw", async () => {
+  await assertRejects(
+    async () =>
+      await executeTypeScriptInWorker({
+        typeScriptCode: await (
+          await fetch(import.meta.resolve("./example/throw.ts"))
+        ).text(),
+        logger: getLogger("throw"),
+        timeout: 10000,
+      }),
+    Error,
+    "always throw"
   );
 });
 

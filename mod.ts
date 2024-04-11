@@ -100,6 +100,7 @@ export async function runner(
             typeScriptCode: job.runnableCode,
             timeout,
             logger: getLogger(`job-${job.id}`),
+            workerName: `job-${job.id}`,
           });
 
           await updateRunnerJob({
@@ -153,6 +154,7 @@ export async function executeTypeScriptInWorker<T>(
     typeScriptCode: string;
     timeout: number;
     logger: Logger;
+    workerName: string;
   }>
 ): Promise<T> {
   const dirPath = await Deno.makeTempDir();
@@ -166,6 +168,7 @@ export async function executeTypeScriptInWorker<T>(
     javaScriptBundledCode: bundled,
     timeout: props.timeout,
     logger: props.logger,
+    workerName: props.workerName,
   });
 }
 
@@ -177,6 +180,7 @@ const executeJavaScriptInWorker = <T>(
     javaScriptBundledCode: string;
     timeout: number;
     logger: Logger;
+    workerName: string;
   }>
 ) =>
   new Promise<T>((resolve, reject) => {
@@ -188,6 +192,7 @@ const executeJavaScriptInWorker = <T>(
 
     const worker = new Worker(import.meta.resolve(blobUrl), {
       type: "module",
+      name: props.workerName,
     });
 
     worker.onmessage = (e) => {
@@ -202,6 +207,7 @@ const executeJavaScriptInWorker = <T>(
       resolve(e.data);
     };
     worker.onerror = (e) => {
+      e.preventDefault();
       props.logger.error(`Job error: ${e}`);
 
       clearTimeout(timeoutId);
@@ -210,7 +216,7 @@ const executeJavaScriptInWorker = <T>(
         URL.revokeObjectURL(blobUrl);
       }
 
-      reject(e);
+      reject(new Error(e.message));
     };
 
     worker.postMessage({});
