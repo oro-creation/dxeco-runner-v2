@@ -1,4 +1,4 @@
-import { parse } from "https://esm.sh/csv-parse@5.5.5/sync";
+import { parse } from "https://deno.land/std@0.223.0/csv/mod.ts";
 
 onmessage = () => {
   const result = parse(

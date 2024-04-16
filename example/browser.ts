@@ -1,7 +1,9 @@
 import { launch } from "https://deno.land/x/astral@0.3.5/mod.ts";
 
 onmessage = async () => {
-  const browser = await launch({ headless: false });
+  const browser = await launch({
+    // headless: false
+  });
 
   const page = await browser.newPage("https://api.dxeco.io/docs");
 
