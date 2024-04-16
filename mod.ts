@@ -101,6 +101,16 @@ export async function runner(
             timeout,
             logger: getLogger(`job-${job.id}`),
             workerName: `job-${job.id}`,
+            permission: {
+              env: false,
+              hrtime: false,
+              net: true,
+              ffi: false,
+              sys: false,
+              read: false,
+              run: true,
+              write: false,
+            },
           });
 
           await updateRunnerJob({
@@ -155,6 +165,7 @@ export async function executeTypeScriptInWorker<T>(
     timeout: number;
     logger: Logger;
     workerName: string;
+    permission: Deno.PermissionOptions;
   }>
 ): Promise<T> {
   const dirPath = await Deno.makeTempDir();
@@ -169,6 +180,7 @@ export async function executeTypeScriptInWorker<T>(
     timeout: props.timeout,
     logger: props.logger,
     workerName: props.workerName,
+    permission: props.permission,
   });
 }
 
@@ -181,6 +193,7 @@ const executeJavaScriptInWorker = <T>(
     timeout: number;
     logger: Logger;
     workerName: string;
+    permission: Deno.PermissionOptions;
   }>
 ) =>
   new Promise<T>((resolve, reject) => {
@@ -193,6 +206,9 @@ const executeJavaScriptInWorker = <T>(
     const worker = new Worker(import.meta.resolve(blobUrl), {
       type: "module",
       name: props.workerName,
+      deno: {
+        permissions: props.permission,
+      },
     });
 
     worker.onmessage = (e) => {

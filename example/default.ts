@@ -1,4 +1,4 @@
-/// <reference lib="webworker" />
+/// <reference lib="deno.worker" />
 
 import type { AdaptorAccount } from "../type.ts";
 
