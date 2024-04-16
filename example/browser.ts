@@ -9,7 +9,7 @@ onmessage = async () => {
 
   await page.waitForNetworkIdle();
   await (await page.$('input[aria-label="Search"]'))?.type("auth");
-  await page.waitForTimeout(1000);
+  await page.waitForSelector('[data-role="search:results"] li');
 
   postMessage(
     await Promise.all(
