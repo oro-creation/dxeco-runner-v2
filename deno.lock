@@ -164,7 +164,9 @@
   },
   "redirects": {
     "https://deno.land/x/astral/mod.ts": "https://deno.land/x/astral@0.3.5/mod.ts",
+    "https://deno.land/x/deno_dom/deno-dom-wasm.ts": "https://deno.land/x/deno_dom@v0.1.45/deno-dom-wasm.ts",
     "https://deno.land/x/esbuild_deno_loader/mod.ts": "https://deno.land/x/esbuild_deno_loader@0.9.0/mod.ts",
+    "https://esm.sh/build": "https://esm.sh/v135/build",
     "https://esm.sh/csv-parse": "https://esm.sh/csv-parse@5.5.5",
     "https://esm.sh/dom-parser": "https://esm.sh/dom-parser@1.1.5"
   },
@@ -508,6 +510,9 @@
     "https://deno.land/x/zipjs@v2.7.29/lib/core/zip-reader.js": "c918875362d7e46fc690cea0b3f81e50a0ec0b6e20f6ae35e5982de73ae45449",
     "https://deno.land/x/zipjs@v2.7.29/lib/core/zip-writer.js": "b78c099828ec3134983c259adc4d6118fbfda7f033a7e95de8176a470e9a5a54",
     "https://deno.land/x/zipjs@v2.7.29/lib/z-worker-inline.js": "a38bbe15eb011daee291b8243c3101b197aa91dcd786f1c04251bd1dda5c33e7",
-    "https://deno.land/x/zipjs@v2.7.29/lib/zip-fs.js": "a733360302f5fbec9cc01543cb9fcfe7bae3f35a50d0006626ce42fe8183b63f"
+    "https://deno.land/x/zipjs@v2.7.29/lib/zip-fs.js": "a733360302f5fbec9cc01543cb9fcfe7bae3f35a50d0006626ce42fe8183b63f",
+    "https://esm.sh/v135/build": "f83c0ec7363671d873546f8758b36a68897ec140da85112edd2871031520f6f1",
+    "https://esm.sh/v135/~a27aa89c3eaf8446925dc362ae7a8fde5c78a54d@0.0.0/denonext/mod.mjs": "51f83a96c2106814b4fe3f49173e60b24f462c93fec6713d39b950439849f6a3",
+    "https://esm.sh/~a27aa89c3eaf8446925dc362ae7a8fde5c78a54d": "198c0083722e3075970d65c745f8451dcf77bef6c321075a1e04cac1b3e28825"
   }
 }
