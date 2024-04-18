@@ -1,4 +1,4 @@
-import { parse } from "https://esm.sh/jsr/@std/csv@0.223.0";
+import { parse } from "jsr:@std/csv@0.223.0";
 
 onmessage = () => {
   const result = parse(
