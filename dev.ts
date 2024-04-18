@@ -5,5 +5,4 @@ await runner({
   apiKey: "dummy",
   apiUrl: new URL("http://localhost:4000/api"),
   interval: 5000,
-  timeout: 10000,
 });
