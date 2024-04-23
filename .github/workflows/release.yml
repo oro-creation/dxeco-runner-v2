@@ -1,4 +1,4 @@
-name: test
+name: compile and set release
 
 on:
   workflow_dispatch:
@@ -7,9 +7,9 @@ on:
   pull_request:
 
 jobs:
-  build-windows:
+  compile:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v1
-      - run: deno run ./compile.ts
+      - run: deno run -A ./release.ts
