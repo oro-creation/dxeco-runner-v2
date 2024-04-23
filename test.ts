@@ -67,7 +67,35 @@ Deno.test("fetch", async () => {
     logger: getLogger("fetch"),
     timeout: 10000,
     workerName: "fetch",
-    permission: {},
+    permission: { net: ["dummyjson.com"] },
+  });
+
+  assertEquals(result.id, 1);
+});
+
+Deno.test("redaxios", async () => {
+  const result = await executeTypeScriptInWorker<{ id: number }>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/redaxios.ts"))
+    ).text(),
+    logger: getLogger("redaxios"),
+    timeout: 10000,
+    workerName: "redaxios",
+    permission: { net: ["dummyjson.com"] },
+  });
+
+  assertEquals(result.id, 1);
+});
+
+Deno.test("ky", async () => {
+  const result = await executeTypeScriptInWorker<{ id: number }>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/ky.ts"))
+    ).text(),
+    logger: getLogger("ky"),
+    timeout: 10000,
+    workerName: "ky",
+    permission: { net: ["dummyjson.com"] },
   });
 
   assertEquals(result.id, 1);
@@ -98,7 +126,7 @@ Deno.test("domParser", async () => {
     logger: getLogger("domParser"),
     timeout: 10000,
     workerName: "domParser",
-    permission: {},
+    permission: { net: ["www.npmjs.com"] },
   });
 
   assertEquals(result[0], "Installation");
@@ -112,7 +140,16 @@ Deno.test("browser", async () => {
     logger: getLogger("browser"),
     timeout: 100000,
     workerName: "browser",
-    permission: {},
+    permission: {
+      env: true,
+      hrtime: false,
+      net: true,
+      ffi: false,
+      sys: false,
+      read: true,
+      run: true,
+      write: true,
+    },
   });
 
   console.log(result);
