@@ -4,23 +4,12 @@ on:
   workflow_dispatch:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+  pull_request:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          - x86_64-pc-windows-msvc
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v1
-      - run: deno compile -A --unstable-worker-options --target ${{ matrix.target }} ./cli.ts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.target }}
-          path: dxeco-runner-v2*
+      - run: deno run ./compile.ts
