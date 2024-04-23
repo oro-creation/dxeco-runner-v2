@@ -1,7 +1,7 @@
-import { bundle } from "https://deno.land/x/emit@0.38.3/mod.ts";
+import { bundle } from "https://deno.land/x/emit@0.40.0/mod.ts";
 import { delay } from "jsr:@std/async";
+import { encodeBase64 } from "jsr:@std/encoding/base64";
 import { Logger, getLogger } from "jsr:@std/log";
-import { join } from "jsr:@std/path";
 import {
   activateRunner,
   getCurrentUser,
@@ -168,12 +168,11 @@ export async function executeTypeScriptInWorker<T>(
     permission: Deno.PermissionOptions;
   }>
 ): Promise<T> {
-  const dirPath = await Deno.makeTempDir();
+  const dataUrl = `data:text/typescript;base64,${encodeBase64(
+    props.typeScriptCode
+  )}`;
 
-  const runnableCodePath = join(dirPath, "mod.ts");
-  await Deno.writeTextFile(runnableCodePath, props.typeScriptCode);
-
-  const bundled = (await bundle(runnableCodePath)).code;
+  const bundled = (await bundle(dataUrl)).code;
 
   return await executeJavaScriptInWorker({
     javaScriptBundledCode: bundled,
