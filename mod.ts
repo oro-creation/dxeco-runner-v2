@@ -102,14 +102,14 @@ export async function runner(
             logger: getLogger(`job-${job.id}`),
             workerName: `job-${job.id}`,
             permission: {
-              env: false,
+              env: true,
               hrtime: false,
               net: true,
               ffi: false,
               sys: false,
-              read: false,
+              read: true,
               run: true,
-              write: false,
+              write: true,
             },
           });
 

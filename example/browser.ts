@@ -1,4 +1,4 @@
-import { launch } from "https://deno.land/x/astral@0.3.5/mod.ts";
+import { launch } from "https://esm.sh/jsr/@astral/astral@0.3.6";
 
 onmessage = async () => {
   const browser = await launch({
