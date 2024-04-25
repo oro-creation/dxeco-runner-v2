@@ -120,6 +120,7 @@ export async function updateRunnerJob(props: {
   result?: unknown;
 }): Promise<void> {
   await ky.put(`runner-jobs/${props.jobId}`, {
+    prefixUrl: props.apiUrl,
     headers: {
       "X-API-Key": props.apiKey,
       "Content-Type": "application/json",
