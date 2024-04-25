@@ -5,7 +5,7 @@ import {
 } from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
 import { join } from "jsr:@std/url";
-import { TimeoutError, executeTypeScriptInWorker } from "./mod.ts";
+import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 
 Deno.test("default", async () => {
   const result = await executeTypeScriptInWorker({
@@ -38,7 +38,7 @@ Deno.test("loop", async () => {
         permission: {},
       }),
     TimeoutError,
-    "Timeout"
+    "Timeout",
   );
 });
 
@@ -55,7 +55,7 @@ Deno.test("throw", async () => {
         permission: {},
       }),
     Error,
-    "always throw"
+    "always throw",
   );
 });
 
@@ -71,6 +71,23 @@ Deno.test("fetch", async () => {
   });
 
   assertEquals(result.id, 1);
+});
+
+Deno.test("permission net", async () => {
+  await assertRejects(
+    async () =>
+      await executeTypeScriptInWorker<{ id: number }>({
+        typeScriptCode: await (
+          await fetch(import.meta.resolve("./example/fetch.ts"))
+        ).text(),
+        logger: getLogger("permission net"),
+        timeout: 10000,
+        workerName: "permission net",
+        permission: {},
+      }),
+    Error,
+    "PermissionDenied",
+  );
 });
 
 Deno.test("redaxios", async () => {
@@ -160,13 +177,13 @@ Deno.test("browser", async () => {
 Deno.test("url base", () => {
   assertEquals(
     join(new URL("foo/sub", "https://example.com/api")),
-    new URL("https://example.com/foo/sub")
+    new URL("https://example.com/foo/sub"),
   );
 });
 
 Deno.test("url join", () => {
   assertEquals(
     join(new URL("https://example.com/api"), "foo/sub"),
-    new URL("https://example.com/api/foo/sub")
+    new URL("https://example.com/api/foo/sub"),
   );
 });
