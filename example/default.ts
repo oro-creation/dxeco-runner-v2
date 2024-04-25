@@ -1,5 +1,6 @@
 /// <reference lib="deno.worker" />
 
+// TODO GitHub リポジトリを公開後に GitHub の raw URL をimportするようにする
 import type { AdaptorAccount } from "../type.ts";
 
 onmessage = () => {
