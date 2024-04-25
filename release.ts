@@ -1,145 +1,154 @@
+import { Command } from "jsr:@cliffy/command@1.0.0-rc.4";
 import { exec } from "npm:@actions/exec";
+import ky from "npm:ky";
 
-function getTagNameOrRef(): string {
-  const githubRef = Deno.env.get("GITHUB_REF");
-  if (githubRef === undefined) {
-    throw new Error("GITHUB_REF is not set");
-  }
-  return /^refs\/tags\/(.+)$/u.exec(githubRef)?.[1] ?? githubRef;
-}
-
-async function getOrCreateReleaseAndRelease(props: {
-  tagNameOrRef: string;
-  repositoryOwner: string;
-  repositoryName: string;
-}): Promise<{ releaseId: string; assets?: ReadonlyMap<string, string> }> {
-  const response = await octokit.graphql<{
-    repository: null | {
-      id: string;
-      releaseAssets: {
-        nodes: ReadonlyArray<{
-          id: string;
-          name: string;
-        }>;
-      };
-    };
-  }>(
-    `
-query ($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
-    release(tagName: "") {
-      id
-      releaseAssets(first: 100) {
-        nodes {
-          id
-          name
-        }
-      }
-    }
-  }
-}
-`,
+/**
+ * https://docs.github.com/ja/rest/releases/assets?apiVersion=2022-11-28#list-release-assets
+ *
+ * Deno で `@octokit/core` を使うと
+ * ```txt
+ * Uncaught (in promise) HttpError: Not Found - https://docs.github.com/rest
+ * ```
+ * エラーが発生してしまうので fetch を使って実装
+ */
+const listReleaseAssets = async (parameter: {
+  githubRepository: string;
+  releaseId: number;
+  githubToken: string;
+}): Promise<
+  ReadonlyArray<{ readonly id: number; readonly name: string }>
+> => {
+  return await (await ky.get(
+    `https://api.github.com/repos/${parameter.githubRepository}/releases/${parameter.releaseId}/assets`,
     {
-      owner: repositoryOwner,
-      repo: repositoryName,
+      headers: {
+        Authorization: `Bearer ${parameter.githubToken}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    },
+  )).json();
+};
+
+/**
+ * https://docs.github.com/ja/rest/releases/assets?apiVersion=2022-11-28#delete-a-release-asset
+ * Deno で `@octokit/core` を使うと
+ * ```txt
+ * Uncaught (in promise) HttpError: Not Found - https://docs.github.com/rest
+ * ```
+ * エラーが発生してしまうので fetch を使って実装
+ */
+const deleteReleaseAsset = async (parameter: {
+  readonly githubRepository: string;
+  readonly githubToken: string;
+  readonly assetId: number;
+}): Promise<void> => {
+  const response = await ky.delete(
+    `https://api.github.com/repos/${parameter.githubRepository}/releases/assets/${parameter.assetId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${parameter.githubToken}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
     },
   );
-  if (response.repository !== null) {
-    return {
-      releaseId: response.repository.id,
-      assets: new Map(
-        response.repository.releaseAssets.nodes.map((asset) => [
-          asset.name,
-          asset.id,
-        ]),
-      ),
-    };
+  const text = await response.text();
+  console.log(text);
+};
+
+/**
+ * https://docs.github.com/ja/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
+ * Deno で `@octokit/core` を使うと
+ * ```txt
+ * Uncaught (in promise) HttpError: Not Found - https://docs.github.com/rest
+ * ```
+ * エラーが発生してしまうので fetch を使って実装
+ */
+const uploadReleaseAsset = async (parameter: {
+  readonly githubRepository: string;
+  readonly githubToken: string;
+  readonly name: string;
+  readonly releaseId: number;
+  readonly body: Uint8Array;
+}): Promise<void> => {
+  await ky.post(
+    `https://uploads.github.com/repos/${parameter.githubRepository}/releases/${parameter.releaseId}/assets`,
+    {
+      searchParams: {
+        name: parameter.name,
+      },
+      headers: {
+        Authorization: `Bearer ${parameter.githubToken}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/octet-stream",
+      },
+      body: parameter.body,
+    },
+  );
+};
+
+new Command().option(
+  "--releaseId=<value:integer>",
+  "database id of the release.",
+  { required: true },
+).option(
+  "--githubToken=<value>",
+  "",
+  { required: true },
+).env(
+  "GITHUB_REPOSITORY=<value>",
+  "",
+  { required: true },
+).action(async ({ githubRepository, releaseId, githubToken }) => {
+  const helpText = await new Deno.Command(Deno.execPath(), {
+    args: ["compile", "--help"],
+  }).output();
+
+  const valuesText = /--target <target>[\w\W]+?\[possible values:([^\]]+)/gu
+    .exec(
+      new TextDecoder().decode(helpText.stdout),
+    )?.[1];
+
+  if (valuesText === undefined) {
+    throw new Error("Failed to parse target possible values");
   }
-  console.log(`not found release by tag (${tagNameOrRef}) creating...`);
-  const release = await octokit.rest.repos.createRelease({
-    owner: props.repositoryOwner,
-    repo: props.repositoryName,
-    tag_name: tagNameOrRef,
-    make_latest: "true",
-    generate_release_notes: true,
+  const possibleValues = valuesText.split(",").map((value) => value.trim());
+
+  const assets = await listReleaseAssets({
+    githubRepository,
+    releaseId,
+    githubToken,
   });
-  return { releaseId: release.data.id };
-}
 
-async function uploadOrUpdateReleaseAsset(props: {
-  releaseId: number;
-  repositoryOwner: string;
-  repositoryName: string;
-  name: string;
-}): Promise<void> {
-  await octokit.rest.repos.getReleaseAsset({
-    owner: props.repositoryOwner,
-    repo: props.repositoryName,
-    release_id: props.releaseId,
-    name: "sample",
-  });
-  await octokit.rest.repos.uploadReleaseAsset({
-    owner: props.repositoryOwner,
-    repo: props.repositoryName,
-    release_id: props.releaseId,
-    name: "sample",
-    data: "only text?",
-  });
-}
+  for (const target of possibleValues) {
+    await exec(Deno.execPath(), [
+      "compile",
+      "-A",
+      "--target",
+      target,
+      "--output",
+      target,
+      "./cli.ts",
+    ]);
 
-const tagNameOrRef = getTagNameOrRef();
-console.log("tagNameOrRef", tagNameOrRef);
+    const fileName = target.includes("windows") ? `${target}.exe` : target;
 
-const helpText = await new Deno.Command(Deno.execPath(), {
-  args: ["compile", "--help"],
-}).output();
-
-const valuesText = /--target <target>[\w\W]+?\[possible values:([^\]]+)/gu.exec(
-  new TextDecoder().decode(helpText.stdout),
-)?.[1];
-
-if (valuesText === undefined) {
-  throw new Error("Failed to parse target possible values");
-}
-const possibleValues = valuesText.split(",").map((value) => value.trim());
-
-for (const target of possibleValues) {
-  await exec(Deno.execPath(), [
-    "compile",
-    "--target",
-    target,
-    "./cli.ts",
-    "--output",
-    // windows の場合はファイル名末尾に exe が付く
-    target,
-  ]);
-}
-const githubToken = Deno.env.get("GITHUB_TOKEN");
-if (githubToken === undefined) {
-  throw new Error("GITHUB_TOKEN is not set");
-}
-const octokit = getOctokit(githubToken);
-const repositoryOwner = Deno.env.get("GITHUB_REPOSITORY_OWNER");
-if (repositoryOwner === undefined) {
-  throw new Error("GITHUB_REPOSITORY_OWNER is not set");
-}
-const repositoryName = Deno.env.get("GITHUB_REPOSITORY_NAME");
-if (repositoryName === undefined) {
-  throw new Error("GITHUB_REPOSITORY_NAME is not set");
-}
-
-const readme = await octokit.rest.repos.getReadme({
-  owner: repositoryOwner,
-  repo: repositoryName,
-});
-console.log("readme", readme);
-
-await uploadOrUpdateReleaseAsset({
-  repositoryOwner: repositoryOwner,
-  repositoryName: repositoryName,
-  releaseId: await getOrCreateRelease({
-    repositoryName,
-    repositoryOwner,
-    tagNameOrRef,
-  }),
-});
+    const asset = assets.find((asset) => asset.name === fileName);
+    if (asset !== undefined) {
+      await deleteReleaseAsset({
+        assetId: asset.id,
+        githubRepository,
+        githubToken,
+      });
+    }
+    await uploadReleaseAsset({
+      githubRepository,
+      releaseId,
+      githubToken,
+      name: fileName,
+      body: await Deno.readFile(fileName),
+    });
+  }
+}).parse();
