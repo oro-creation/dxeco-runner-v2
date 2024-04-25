@@ -90,15 +90,15 @@ const uploadReleaseAsset = async (parameter: {
 };
 
 new Command().option(
-  "--releaseId=<value:integer>",
+  "--releaseId <value:integer>",
   "database id of the release.",
   { required: true },
 ).option(
-  "--githubToken=<value>",
+  "--githubToken <value>",
   "",
   { required: true },
 ).env(
-  "GITHUB_REPOSITORY=<value>",
+  "GITHUB_REPOSITORY <value>",
   "",
   { required: true },
 ).action(async ({ githubRepository, releaseId, githubToken }) => {
@@ -126,6 +126,7 @@ new Command().option(
     await exec(Deno.execPath(), [
       "compile",
       "-A",
+      "--unstable-worker-options",
       "--target",
       target,
       "--output",

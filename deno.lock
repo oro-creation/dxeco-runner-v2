@@ -28,6 +28,7 @@
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
       "jsr:@std/url": "jsr:@std/url@0.223.0",
       "npm:@actions/core": "npm:@actions/core@1.10.1",
+      "npm:@actions/exec": "npm:@actions/exec@1.1.1",
       "npm:@actions/github": "npm:@actions/github@6.0.0_@octokit+core@5.2.0",
       "npm:ky": "npm:ky@1.2.4"
     },
@@ -154,6 +155,12 @@
           "uuid": "uuid@8.3.2"
         }
       },
+      "@actions/exec@1.1.1": {
+        "integrity": "sha512-+sCcHHbVdk93a0XT19ECtO/gIXoxvdsgQLzb2fE2/5sIZmWQuluYyjPQtrtTHdU1YzTZ7bAPN4sITq2xi1679w==",
+        "dependencies": {
+          "@actions/io": "@actions/io@1.1.3"
+        }
+      },
       "@actions/github@6.0.0_@octokit+core@5.2.0": {
         "integrity": "sha512-alScpSVnYmjNEXboZjarjukQEzgCRmjMv6Xj47fsdnqGS73bjJNDpiiXmp8jr0UZLdUB6d9jW63IcmddUP+l0g==",
         "dependencies": {
@@ -169,6 +176,10 @@
           "tunnel": "tunnel@0.0.6",
           "undici": "undici@5.28.4"
         }
+      },
+      "@actions/io@1.1.3": {
+        "integrity": "sha512-wi9JjgKLYS7U/z8PPbco+PvTb/nRWjeoFlJ1Qer83k/3C5PHQi28hiVdeE2kHXmIL99mQFawx8qt/JPjZilJ8Q==",
+        "dependencies": {}
       },
       "@fastify/busboy@2.1.1": {
         "integrity": "sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==",

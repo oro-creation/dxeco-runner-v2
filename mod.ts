@@ -1,7 +1,7 @@
 import { bundle } from "https://deno.land/x/emit@0.40.0/mod.ts";
 import { delay } from "jsr:@std/async";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
-import { Logger, getLogger } from "jsr:@std/log";
+import { getLogger, Logger } from "jsr:@std/log";
 import {
   activateRunner,
   getCurrentUser,
@@ -35,7 +35,7 @@ export async function runner(
      * @default 30000
      */
     timeout?: number;
-  }>
+  }>,
 ) {
   const logger = getLogger();
 
@@ -166,11 +166,13 @@ export async function executeTypeScriptInWorker<T>(
     logger: Logger;
     workerName: string;
     permission: Deno.PermissionOptions;
-  }>
+  }>,
 ): Promise<T> {
-  const dataUrl = `data:text/typescript;base64,${encodeBase64(
-    props.typeScriptCode
-  )}`;
+  const dataUrl = `data:text/typescript;base64,${
+    encodeBase64(
+      props.typeScriptCode,
+    )
+  }`;
 
   const bundled = (await bundle(dataUrl)).code;
 
@@ -193,13 +195,13 @@ const executeJavaScriptInWorker = <T>(
     logger: Logger;
     workerName: string;
     permission: Deno.PermissionOptions;
-  }>
+  }>,
 ) =>
   new Promise<T>((resolve, reject) => {
     const blobUrl = URL.createObjectURL(
       new Blob([props.javaScriptBundledCode], {
         type: "text/javascript",
-      })
+      }),
     );
 
     const worker = new Worker(import.meta.resolve(blobUrl), {

@@ -1,5 +1,4 @@
 import { Logger } from "jsr:@std/log";
-import { join } from "jsr:@std/url";
 import ky from "npm:ky";
 
 /**
@@ -13,14 +12,10 @@ export async function getCurrentUser(props: {
   id: string;
   organizationId: string;
 }> {
-  const res = await fetch(join(props.apiUrl, "auth", "current-user"), {
+  const res = await ky.get("auth/current-user", {
+    prefixUrl: props.apiUrl,
     headers: { "X-API-Key": props.apiKey },
   });
-  if (!res.ok) {
-    throw new Error(
-      `Failed to get current user: ${res.status} ${await res.text()}`
-    );
-  }
   return await res.json();
 }
 
@@ -34,22 +29,16 @@ export async function registerRunner(props: {
   organizationId: string;
   name: string;
 }): Promise<{ id: string }> {
-  const res = await fetch(join(props.apiUrl, "runners", "register"), {
-    method: "POST",
+  const res = await ky.post("runners/register", {
+    prefixUrl: props.apiUrl,
     headers: {
       "X-API-Key": props.apiKey,
-      "Content-Type": "application/json",
     },
-    body: JSON.stringify({
+    json: {
       organizationId: props.organizationId,
       name: props.name,
-    }),
+    },
   });
-  if (!res.ok) {
-    throw new Error(
-      `Failed to register runner: ${res.status} ${await res.text()}`
-    );
-  }
   return await res.json();
 }
 
@@ -65,21 +54,16 @@ export async function activateRunner(props: {
   logger: Logger;
 }): Promise<void> {
   try {
-    const res = await fetch(
-      join(props.apiUrl, "runners", props.runnerId, "activate"),
+    await ky.post(
+      `runners/${props.runnerId}/activate`,
       {
-        method: "POST",
+        prefixUrl: props.apiUrl,
         headers: {
           "X-API-Key": props.apiKey,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: props.runnerId }),
-      }
+        json: JSON.stringify({ id: props.runnerId }),
+      },
     );
-
-    if (!res.ok) {
-      throw new Error(`${res.status} ${await res.text()}`);
-    }
   } catch (error) {
     props.logger.error(`Failed to activate runner: ${error}`);
   }
@@ -104,8 +88,9 @@ export async function getRunnerJobs(props: {
   }>;
 }> {
   try {
-    // なぜか fetch を使うと connection closed before message completed ERRORが出るため axios で代用
-    const res = ky.get(join(props.apiUrl, "runner-jobs"), {
+    // なぜか fetch を使うと connection closed before message completed ERRORが出るため ky で代用
+    const res = ky.get("runner-jobs", {
+      prefixUrl: props.apiUrl,
       searchParams: {
         organizationId: props.organizationId,
         runnerId: props.runnerId,
@@ -134,17 +119,16 @@ export async function updateRunnerJob(props: {
   errorReason?: string | undefined;
   result?: unknown;
 }): Promise<void> {
-  await fetch(join(props.apiUrl, "runner-jobs", props.jobId), {
-    method: "PUT",
+  await ky.put(`runner-jobs/${props.jobId}`, {
     headers: {
       "X-API-Key": props.apiKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
+    json: {
       id: props.jobId,
       status: props.status,
       errorReason: props.errorReason,
       result: props.result,
-    }),
+    },
   });
 }
