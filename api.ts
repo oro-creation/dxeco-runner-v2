@@ -61,7 +61,7 @@ export async function activateRunner(props: {
         headers: {
           "X-API-Key": props.apiKey,
         },
-        json: JSON.stringify({ id: props.runnerId }),
+        json: { id: props.runnerId },
       },
     );
   } catch (error) {
