@@ -1,4 +1,4 @@
-import { bundle } from "https://deno.land/x/emit@0.40.0/mod.ts";
+import { bundle } from "jsr:@deno/emit";
 import { delay } from "jsr:@std/async";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
 import { getLogger, Logger } from "jsr:@std/log";
