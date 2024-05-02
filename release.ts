@@ -126,7 +126,7 @@ new Command().option(
     await exec(Deno.execPath(), [
       "compile",
       "-A",
-      "--unstable-worker-options",
+      // "--unstable-worker-options",
       "--target",
       target,
       "--output",

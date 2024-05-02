@@ -101,16 +101,6 @@ export async function runner(
             timeout,
             logger: getLogger(`job-${job.id}`),
             workerName: `job-${job.id}`,
-            permission: {
-              env: true,
-              hrtime: false,
-              net: true,
-              ffi: false,
-              sys: false,
-              read: true,
-              run: true,
-              write: true,
-            },
           });
 
           await updateRunnerJob({
@@ -165,7 +155,7 @@ export async function executeTypeScriptInWorker<T>(
     timeout: number;
     logger: Logger;
     workerName: string;
-    permission: Deno.PermissionOptions;
+    // permission: Deno.PermissionOptions;
   }>,
 ): Promise<T> {
   const dataUrl = `data:text/typescript;base64,${
@@ -181,7 +171,7 @@ export async function executeTypeScriptInWorker<T>(
     timeout: props.timeout,
     logger: props.logger,
     workerName: props.workerName,
-    permission: props.permission,
+    // permission: props.permission,
   });
 }
 
@@ -194,7 +184,7 @@ const executeJavaScriptInWorker = <T>(
     timeout: number;
     logger: Logger;
     workerName: string;
-    permission: Deno.PermissionOptions;
+    // permission: Deno.PermissionOptions;
   }>,
 ) =>
   new Promise<T>((resolve, reject) => {
@@ -207,9 +197,9 @@ const executeJavaScriptInWorker = <T>(
     const worker = new Worker(import.meta.resolve(blobUrl), {
       type: "module",
       name: props.workerName,
-      deno: {
-        permissions: props.permission,
-      },
+      // deno: {
+      //   permissions: props.permission,
+      // },
     });
 
     worker.onmessage = (e) => {
