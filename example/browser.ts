@@ -15,7 +15,7 @@ onmessage = async () => {
     await Promise.all(
       (
         await page.$$('[data-role="search:results"] li')
-      ).map((e) => e.innerText())
-    )
+      ).map((e) => e.innerText()),
+    ),
   );
 };
