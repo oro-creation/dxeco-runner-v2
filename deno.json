@@ -4,9 +4,8 @@
     "exactOptionalPropertyTypes": true
   },
   "tasks": {
-    "dev": "deno run --watch --check --unstable-worker-options -A ./dev.ts",
+    "dev": "deno run --watch --check -A ./dev.ts",
     "lint": "deno lint",
-    "test": "deno test -A --unstable-worker-options",
-    "compile": "deno compile -A --unstable-worker-options ./cli.ts"
+    "test": "deno test -A"
   }
 }
