@@ -23,7 +23,7 @@ https://github.com/oro-creation/dxeco-runner-v2/releases
 
 必要なパラメーターが不足している場合は、指定できるパラメーター一覧が表示されます
 
-## 権限を指定しての実行 (Denoのインストールが必要です)
+## 権限を指定しての実行例 (Denoのインストールが必要です)
 
 ```sh
 deno run --allow-net=api.dxeco.io --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --allow-read=/Users/narumi/Library/Caches/deno,'/Users/narumi/Library/Application Support/deno-wasmbuild' https://raw.githubusercontent.com/oro-creation/dxeco-runner-v2/main/cli.ts --name RunnerName --api-key apiKey
@@ -33,3 +33,6 @@ deno run --allow-net=api.dxeco.io --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --a
 から JavaScript へバンドルする際に使用する
 [emit](https://github.com/denoland/deno_emit) が必要なためです.
 またOSによって読み取るファイルのパスが異なります
+
+また権限が必要になったタイミングで権限を許可するかの聞かれます. y
+と答えることで許可をすることができます
