@@ -1,0 +1,12 @@
+name: test
+
+on:
+  pull_request
+
+jobs:
+  deno-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+      - run: deno task test

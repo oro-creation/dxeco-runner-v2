@@ -1,0 +1,16 @@
+name: compile and set release
+
+on:
+  release:
+    types: [created, edited]
+
+permissions:
+  contents: write
+
+jobs:
+  compile-and-set-release:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+      - run: deno run -A ./release.ts

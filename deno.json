@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "tasks": {
+    "dev": "deno run --watch --check -A ./dev.ts",
+    "lint": "deno lint",
+    "test": "deno test -A"
+  }
+}
