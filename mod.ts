@@ -188,13 +188,11 @@ const executeJavaScriptInWorker = <T>(
   }>,
 ) =>
   new Promise<T>((resolve, reject) => {
-    const blobUrl = URL.createObjectURL(
-      new Blob([props.javaScriptBundledCode], {
-        type: "text/javascript",
-      }),
-    );
+    const dataUrl = `data:text/javascript;base64,${
+      encodeBase64(props.javaScriptBundledCode)
+    }`;
 
-    const worker = new Worker(import.meta.resolve(blobUrl), {
+    const worker = new Worker(import.meta.resolve(dataUrl), {
       type: "module",
       name: props.workerName,
       // deno: {
@@ -207,9 +205,6 @@ const executeJavaScriptInWorker = <T>(
 
       clearTimeout(timeoutId);
       worker.terminate();
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
 
       resolve(e.data);
     };
@@ -219,9 +214,6 @@ const executeJavaScriptInWorker = <T>(
 
       clearTimeout(timeoutId);
       worker.terminate();
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
 
       reject(new Error(e.message));
     };
@@ -230,9 +222,6 @@ const executeJavaScriptInWorker = <T>(
 
     const timeoutId = setTimeout(() => {
       worker.terminate();
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
 
       reject(new TimeoutError());
     }, props.timeout);
