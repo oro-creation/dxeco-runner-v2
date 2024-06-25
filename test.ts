@@ -165,7 +165,7 @@ Deno.test("domParser", async () => {
 
 Deno.test("url base", () => {
   assertEquals(
-    join(new URL("foo/sub", "https://example.com/api")),
+    new URL("foo/sub", "https://example.com/api"),
     new URL("https://example.com/foo/sub"),
   );
 });
