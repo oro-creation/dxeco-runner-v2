@@ -1,4 +1,5 @@
-import { bundle } from "jsr:@deno/emit";
+import { build, Plugin } from "https://deno.land/x/esbuild@v0.21.5/mod.js";
+import { denoPlugins } from "https://deno.land/x/esbuild_deno_loader@0.9.0/mod.ts";
 import { delay } from "jsr:@std/async";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
 import { getLogger, Logger } from "jsr:@std/log";
@@ -158,13 +159,18 @@ export async function executeTypeScriptInWorker<T>(
     // permission: Deno.PermissionOptions;
   }>,
 ): Promise<T> {
-  const dataUrl = `data:text/typescript;base64,${
-    encodeBase64(
-      props.typeScriptCode,
-    )
-  }`;
+  const tempFile = await Deno.makeTempFile();
+  await Deno.writeTextFile(tempFile, props.typeScriptCode);
+  // const dataUrl = `data:text/typescript;base64,${
+  //   encodeBase64(
+  //     props.typeScriptCode,
+  //   )
+  // }`;
 
-  const bundled = (await bundle(dataUrl)).code;
+  const bundled = (await build({
+    entryPoints: [tempFile],
+    plugins: denoPlugins() as unknown as Plugin[],
+  })).outputFiles?.[0]?.text ?? "";
 
   return await executeJavaScriptInWorker({
     javaScriptBundledCode: bundled,
