@@ -6,6 +6,8 @@
   "tasks": {
     "dev": "deno run --watch --check -A ./dev.ts",
     "lint": "deno lint",
-    "test": "deno test -A"
+    "test": "deno test -A",
+    "compile": "deno compile -A ./cli.ts",
+    "test-compile": "deno run -A ./testInCompile.ts"
   }
 }
