@@ -13,3 +13,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v1
       - run: deno task test
+      - run: deno run -A ./testInCompile.ts
+      - run: deno compile -A --output exeFile ./testInCompile.ts
+      - run: ./exeFile
