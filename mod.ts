@@ -173,6 +173,8 @@ export async function executeTypeScriptInWorker<T>(
   }`;
 
   const bundled = (await bundle(dataUrl, {
+    // deno compile + Windows の環境下でのエラーを回避するために, デフォルトの load の実装を使わないようにしている
+    // https://github.com/oro-creation/dxeco-runner-v2/actions/runs/9690664610/job/26740875627
     load: async (
       specifier,
       _isDynamic,
