@@ -5,8 +5,12 @@
       "jsr:@cliffy/command@1.0.0-rc.4": "jsr:@cliffy/command@1.0.0-rc.4",
       "jsr:@cliffy/flags@1.0.0-rc.4": "jsr:@cliffy/flags@1.0.0-rc.4",
       "jsr:@cliffy/table@1.0.0-rc.4": "jsr:@cliffy/table@1.0.0-rc.4",
+      "jsr:@deno/cache-dir": "jsr:@deno/cache-dir@0.8.0",
       "jsr:@deno/cache-dir@0.8": "jsr:@deno/cache-dir@0.8.0",
       "jsr:@deno/emit": "jsr:@deno/emit@0.41.0",
+      "jsr:@deno/graph": "jsr:@deno/graph@0.78.1",
+      "jsr:@deno/graph@^0.69.7": "jsr:@deno/graph@0.69.10",
+      "jsr:@std/assert": "jsr:@std/assert@0.223.0",
       "jsr:@std/assert@^0.218.2": "jsr:@std/assert@0.218.2",
       "jsr:@std/assert@^0.221.0": "jsr:@std/assert@0.221.0",
       "jsr:@std/assert@^0.223.0": "jsr:@std/assert@0.223.0",
@@ -16,15 +20,19 @@
       "jsr:@std/encoding": "jsr:@std/encoding@0.224.3",
       "jsr:@std/fmt@0.221": "jsr:@std/fmt@0.221.0",
       "jsr:@std/fmt@^0.218.2": "jsr:@std/fmt@0.218.2",
+      "jsr:@std/fmt@^0.223.0": "jsr:@std/fmt@0.223.0",
       "jsr:@std/fmt@^0.225.4": "jsr:@std/fmt@0.225.4",
       "jsr:@std/fs@^0.218.2": "jsr:@std/fs@0.218.2",
       "jsr:@std/fs@^1.0.0-rc.1": "jsr:@std/fs@1.0.0-rc.1",
       "jsr:@std/io@^0.218.2": "jsr:@std/io@0.218.2",
       "jsr:@std/io@^0.224.2": "jsr:@std/io@0.224.2",
       "jsr:@std/log": "jsr:@std/log@0.224.3",
+      "jsr:@std/path@1.0.0-rc.1": "jsr:@std/path@1.0.0-rc.1",
       "jsr:@std/path@^0.218.2": "jsr:@std/path@0.218.2",
       "jsr:@std/path@^0.223.0": "jsr:@std/path@0.223.0",
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
+      "jsr:@std/url": "jsr:@std/url@0.224.1",
+      "npm:@actions/exec": "npm:@actions/exec@1.1.1",
       "npm:ky": "npm:ky@1.3.0"
     },
     "jsr": {
@@ -49,6 +57,7 @@
       "@deno/cache-dir@0.8.0": {
         "integrity": "e87e80a404958f6350d903e6238b72afb92468378b0b32111f7a1e4916ac7fe7",
         "dependencies": [
+          "jsr:@deno/graph@^0.69.7",
           "jsr:@std/fmt@^0.218.2",
           "jsr:@std/fs@^0.218.2",
           "jsr:@std/io@^0.218.2",
@@ -62,6 +71,12 @@
           "jsr:@std/path@^0.223.0"
         ]
       },
+      "@deno/graph@0.69.10": {
+        "integrity": "38fe22ac5686f6ece5daeec5a4df65c6314d7d32adcc33f77917a13cfaffa26f"
+      },
+      "@deno/graph@0.78.1": {
+        "integrity": "a2cab75a9886e2932d72e9b3488ea5e720c029e832d063d1cb31670fc27c6def"
+      },
       "@std/assert@0.218.2": {
         "integrity": "7f0a5a1a8cf86607cd6c2c030584096e1ffad27fc9271429a8cb48cfbdee5eaf"
       },
@@ -69,7 +84,10 @@
         "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
       },
       "@std/assert@0.223.0": {
-        "integrity": "eb8d6d879d76e1cc431205bd346ed4d88dc051c6366365b1af47034b0670be24"
+        "integrity": "eb8d6d879d76e1cc431205bd346ed4d88dc051c6366365b1af47034b0670be24",
+        "dependencies": [
+          "jsr:@std/fmt@^0.223.0"
+        ]
       },
       "@std/async@0.224.2": {
         "integrity": "4d277d6e165df43d5e061ba0ef3edfddb8e8d558f5b920e3e6b1d2614b44d074"
@@ -88,6 +106,9 @@
       },
       "@std/fmt@0.221.0": {
         "integrity": "379fed69bdd9731110f26b9085aeb740606b20428ce6af31ef6bd45ef8efa62a"
+      },
+      "@std/fmt@0.223.0": {
+        "integrity": "6deb37794127dfc7d7bded2586b9fc6f5d50e62a8134846608baf71ffc1a5208"
       },
       "@std/fmt@0.225.4": {
         "integrity": "584c681cf422b70e28959b57e59012823609c087384cbf12d05f67814797fda3"
@@ -128,19 +149,44 @@
           "jsr:@std/assert@^0.223.0"
         ]
       },
+      "@std/path@1.0.0-rc.1": {
+        "integrity": "b8c00ae2f19106a6bb7cbf1ab9be52aa70de1605daeb2dbdc4f87a7cbaf10ff6"
+      },
       "@std/text@0.221.0": {
         "integrity": "a2f89ceb0d8851cd33e6774064621a1da9fbc36578cf4f02c5b5bcd7e8c84b67",
         "dependencies": [
           "jsr:@std/assert@^0.221.0"
         ]
+      },
+      "@std/url@0.224.1": {
+        "integrity": "19f0e1c6ff8fc2ef9522a746595c24f53be47425daa910eb8ef39cbb5e00b3df",
+        "dependencies": [
+          "jsr:@std/path@1.0.0-rc.1"
+        ]
       }
     },
     "npm": {
+      "@actions/exec@1.1.1": {
+        "integrity": "sha512-+sCcHHbVdk93a0XT19ECtO/gIXoxvdsgQLzb2fE2/5sIZmWQuluYyjPQtrtTHdU1YzTZ7bAPN4sITq2xi1679w==",
+        "dependencies": {
+          "@actions/io": "@actions/io@1.1.3"
+        }
+      },
+      "@actions/io@1.1.3": {
+        "integrity": "sha512-wi9JjgKLYS7U/z8PPbco+PvTb/nRWjeoFlJ1Qer83k/3C5PHQi28hiVdeE2kHXmIL99mQFawx8qt/JPjZilJ8Q==",
+        "dependencies": {}
+      },
       "ky@1.3.0": {
         "integrity": "sha512-QUViPXlgP6NKA57IAPff/aZSmRA6qs9wKxlEpayBorwRZG+x2LG7jD4kXh8lnH3q/gkUr64NyZ7kwErUEZJmlw==",
         "dependencies": {}
       }
     }
   },
-  "remote": {}
+  "remote": {
+    "https://deno.land/x/ky@v1.3.0/source/index.ts": "a3e628989c0ffa5dfe33b1c49234814c241923ac4288440cce33aa6847aef873",
+    "https://esm.sh/ky@1.2.4": "eb63133b8ff023304e99cfb9039569338491f9ffc870b5cdebb16e31d0740f55",
+    "https://esm.sh/ky@1.3.0": "b7c1c2ca43309d0502a2dc2c1b21e4424c572befb3dc7143187a9708ab81cfa5",
+    "https://esm.sh/v135/ky@1.2.4/denonext/ky.mjs": "4ffec60ea294e16af227587270d91928807200c8d73922f29da33fde89b7317e",
+    "https://esm.sh/v135/ky@1.3.0/denonext/ky.mjs": "4bce545e3b9eb210263bc38fcb7a22c35a6de1bc4225f44c2421b53651ef35bc"
+  }
 }

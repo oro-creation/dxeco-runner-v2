@@ -5,6 +5,7 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
+  "editor.tabSize": 2,
   "editor.defaultFormatter": "denoland.vscode-deno",
   "deno.enable": true
 }
