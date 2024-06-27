@@ -4,6 +4,18 @@ on:
   pull_request
 
 jobs:
+  deno-test-compile:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+      - run: deno compile -A --output exeFile ./testInCompile.ts
+      - run: ./exeFile
+
   deno-test:
     strategy:
       matrix:
@@ -15,5 +27,3 @@ jobs:
       - uses: denoland/setup-deno@v1
       - run: deno task test
       - run: deno run -A ./testInCompile.ts
-      - run: deno compile -A --output exeFile ./testInCompile.ts
-      - run: ./exeFile

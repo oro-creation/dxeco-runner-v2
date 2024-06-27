@@ -1,3 +1,4 @@
+import { LoadResponse } from "jsr:@deno/cache-dir";
 import { bundle } from "jsr:@deno/emit";
 import { delay } from "jsr:@std/async";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
@@ -146,6 +147,9 @@ export async function runner(
   }
 }
 
+const moduleCacheEntryCode: string = "";
+const moduleCache = new Map<string, LoadResponse>();
+
 /**
  * DenoのTypeScriptコードをWeb Workerで実行します
  */
@@ -158,13 +162,41 @@ export async function executeTypeScriptInWorker<T>(
     // permission: Deno.PermissionOptions;
   }>,
 ): Promise<T> {
+  if (moduleCacheEntryCode !== props.typeScriptCode) {
+    moduleCache.clear();
+  }
+
   const dataUrl = `data:text/typescript;base64,${
     encodeBase64(
       props.typeScriptCode,
     )
   }`;
 
-  const bundled = (await bundle(dataUrl)).code;
+  const bundled = (await bundle(dataUrl, {
+    // deno compile + Windows の環境下でのエラーを回避するために, デフォルトの load の実装を使わないようにしている
+    // https://github.com/oro-creation/dxeco-runner-v2/actions/runs/9690664610/job/26740875627
+    load: async (
+      specifier,
+      _isDynamic,
+      _cacheSetting,
+      _checksum,
+    ) => {
+      const moduleInCache = moduleCache.get(specifier);
+      if (moduleInCache) {
+        return moduleInCache;
+      }
+      props.logger.info(`Fetch ${specifier}`);
+      const response = await fetch(specifier);
+      const module: LoadResponse = {
+        specifier,
+        content: await response.text(),
+        kind: "module",
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+      moduleCache.set(specifier, module);
+      return module;
+    },
+  })).code;
 
   return await executeJavaScriptInWorker({
     javaScriptBundledCode: bundled,
