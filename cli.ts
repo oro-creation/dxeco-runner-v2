@@ -13,15 +13,19 @@ await new Command()
   .option("--api-url <apiUrl>", "API URL", {
     default: "https://api.dxeco.io/api",
   })
-  .option("--interval <interval:number>", "Jobs polling interval", {
-    default: 30000,
+  .option("--interval <interval:number>", "Jobs polling interval (ms)", {
+    default: 300000,
   })
-  .action(async ({ name, apiKey, apiUrl, interval }) => {
+  .option("--timeout <timeout:number>", "Timeout (ms)", {
+    default: 300000,
+  })
+  .action(async ({ name, apiKey, apiUrl, interval, timeout }) => {
     await runner({
       name,
       apiKey,
       apiUrl: new URL(apiUrl),
       interval,
+      timeout,
     });
   })
   .parse();

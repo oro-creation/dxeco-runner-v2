@@ -28,12 +28,12 @@ export async function runner(
     apiUrl?: URL;
     /**
      * Jobs polling interval
-     * @default 30000
+     * @default 300000
      */
     interval?: number;
     /**
      * timeout
-     * @default 30000
+     * @default 300000
      */
     timeout?: number;
   }>,
@@ -44,8 +44,8 @@ export async function runner(
     name,
     apiKey,
     apiUrl = new URL("https://api.dxeco.io/api"),
-    interval = 30000,
-    timeout = 30000,
+    interval = 300000,
+    timeout = 300000,
   } = props;
 
   try {
