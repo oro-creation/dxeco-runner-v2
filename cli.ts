@@ -14,7 +14,7 @@ await new Command()
     default: "https://api.dxeco.io/api",
   })
   .option("--interval <interval:number>", "Jobs polling interval (ms)", {
-    default: 300000,
+    default: 30000,
   })
   .option("--timeout <timeout:number>", "Timeout (ms)", {
     default: 300000,
