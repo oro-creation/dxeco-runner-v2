@@ -144,7 +144,13 @@ Deno.test("domParser", async () => {
 Deno.test("browser", async () => {
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/browser.ts"))
+      await fetch(
+        import.meta.resolve(
+          Deno.build.os === "windows" || Deno.build.os === "darwin"
+            ? "./example/browser.ts"
+            : "./example/browserBinary.ts",
+        ),
+      )
     ).text(),
     logger: getLogger("browser"),
     timeout: 100000,
