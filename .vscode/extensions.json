@@ -1,6 +1,8 @@
 {
   "recommendations": [
     "denoland.vscode-deno",
-    "github.vscode-github-actions"
+    "github.vscode-github-actions",
+    "exiasr.hadolint",
+    "ms-azuretools.vscode-docker"
   ]
 }
