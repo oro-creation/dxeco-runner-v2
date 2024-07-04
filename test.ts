@@ -1,4 +1,8 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
+import {
+  assertEquals,
+  assertRejects,
+  assertStringIncludes,
+} from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
 import { join } from "jsr:@std/url";
 import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
@@ -137,31 +141,20 @@ Deno.test("domParser", async () => {
   assertEquals(result[0], "Installation");
 });
 
-// GitHub Action 上でのテストが失敗するので一時的にコメントアウト
-// Deno.test("browser", async () => {
-//   const result = await executeTypeScriptInWorker<string[]>({
-//     typeScriptCode: await (
-//       await fetch(import.meta.resolve("./example/browser.ts"))
-//     ).text(),
-//     logger: getLogger("browser"),
-//     timeout: 100000,
-//     workerName: "browser",
-//     permission: {
-//       env: true,
-//       hrtime: false,
-//       net: true,
-//       ffi: false,
-//       sys: false,
-//       read: true,
-//       run: true,
-//       write: true,
-//     },
-//   });
+Deno.test("browser", async () => {
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/browser.ts"))
+    ).text(),
+    logger: getLogger("browser"),
+    timeout: 100000,
+    workerName: "browser",
+  });
 
-//   console.log(result);
+  console.log(result);
 
-//   assertStringIncludes(result.join(","), "現在のユーザー情報");
-// });
+  assertStringIncludes(result.join(","), "現在のユーザー情報");
+});
 
 Deno.test("url base", () => {
   assertEquals(
