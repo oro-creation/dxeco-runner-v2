@@ -17,6 +17,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN /root/.deno/bin/deno compile -A ./cli.ts
+RUN /root/.deno/bin/deno compile -A --output dxeco-runner-v2 ./cli.ts
 
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["./dxeco-runner-v2"]
