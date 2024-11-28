@@ -134,7 +134,7 @@ Deno.test("domParser", async () => {
     workerName: "domParser",
   });
 
-  assertEquals(result[0], "Installation");
+  assertEquals(result[0], "dom-parser");
 });
 
 // GitHub Action 上でのテストが失敗するので一時的にコメントアウト

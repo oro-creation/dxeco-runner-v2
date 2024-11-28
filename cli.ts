@@ -1,4 +1,4 @@
-import { Command } from "jsr:@cliffy/command@1.0.0-rc.4";
+import { Command } from "jsr:@cliffy/command@1.0.0-rc.7";
 import { runner } from "./mod.ts";
 
 await new Command()
