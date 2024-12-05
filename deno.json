@@ -4,9 +4,15 @@
     "exactOptionalPropertyTypes": true
   },
   "tasks": {
-    "dev": "deno run --watch --check -A ./dev.ts",
+    "dev": {
+      "description": "開発用 dxeco-runner を起動する",
+      "command": "deno run --watch --check -A ./dev.ts"
+    },
     "lint": "deno lint",
     "test": "deno test -A",
-    "compile": "deno compile -A ./cli.ts"
+    "compile": {
+      "description": "実行ファイルを出力する",
+      "command": "deno compile -A ./cli.ts"
+    }
   }
 }
