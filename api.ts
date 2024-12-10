@@ -94,7 +94,6 @@ export async function getRunnerJobs(props: {
       searchParams: {
         organizationId: props.organizationId,
         runnerId: props.runnerId,
-        type: "CustomAccountIntegration",
         status: "Active",
         limit: -1,
       },

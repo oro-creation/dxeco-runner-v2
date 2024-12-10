@@ -131,7 +131,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
     workerName: "domParser",
   });
 
-  assertEquals(result[0], "Installation");
+  assertEquals(result[0], "dom-parser");
   console.groupEnd();
 }
 
