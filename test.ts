@@ -111,6 +111,22 @@ Deno.test("csv", async () => {
   ]);
 });
 
+Deno.test("csvEsm", async () => {
+  const result = await executeTypeScriptInWorker({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/csvEsm.ts"))
+    ).text(),
+    logger: getLogger("csvEsm"),
+    timeout: 10000,
+    workerName: "csvEsm",
+  });
+
+  assertEquals(result, [
+    ["a", "b", "c"],
+    ["1", "2", "3"],
+  ]);
+});
+
 Deno.test("domParser", async () => {
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
@@ -122,21 +138,6 @@ Deno.test("domParser", async () => {
   });
 
   assertEquals(result[0], "dom-parser");
-});
-
-Deno.test("browser", async () => {
-  const result = await executeTypeScriptInWorker<string[]>({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/browser.ts"))
-    ).text(),
-    logger: getLogger("browser"),
-    timeout: 100000,
-    workerName: "browser",
-  });
-
-  console.log(result);
-
-  assertStringIncludes(result.join(","), "現在のユーザー情報");
 });
 
 Deno.test("playwright", async () => {

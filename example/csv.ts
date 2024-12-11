@@ -1,9 +1,8 @@
-import { parse } from "https://esm.sh/jsr/@std/csv@0.224.0";
+import { parse } from "jsr:@std/csv@1.0.4";
 
-onmessage = () => {
+onmessage = async () => {
   const result = parse(
-    `a,b,c
-1,2,3`,
+    await Deno.readTextFile("./example/sample.csv"),
   );
   console.log(result);
   postMessage(result);

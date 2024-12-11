@@ -1,4 +1,4 @@
-import ky from "https://esm.sh/ky@1.2.4";
+import ky from "npm:ky@1.7.3";
 
 onmessage = async () => {
   // https://dummyjson.com/docs/products

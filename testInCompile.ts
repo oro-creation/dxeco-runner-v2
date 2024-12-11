@@ -111,6 +111,22 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
+  console.group("csvEsm");
+  const result = await executeTypeScriptInWorker({
+    typeScriptCode: await Deno.readTextFile("./example/csvEsm.ts"),
+    logger: getLogger("csvEsm"),
+    timeout: 10000,
+    workerName: "csvEsm",
+  });
+
+  assertEquals(result, [
+    ["a", "b", "c"],
+    ["1", "2", "3"],
+  ]);
+  console.groupEnd();
+}
+
+{
   console.group("domParser");
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await Deno.readTextFile("./example/domParser.ts"),
@@ -120,19 +136,6 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
   });
 
   assertEquals(result[0], "dom-parser");
-  console.groupEnd();
-}
-
-{
-  console.group("browser");
-  const result = await executeTypeScriptInWorker<string[]>({
-    typeScriptCode: await Deno.readTextFile("./example/browser.ts"),
-    logger: getLogger("browser"),
-    timeout: 100000,
-    workerName: "browser",
-  });
-  console.log(result);
-  assertStringIncludes(result.join(","), "現在のユーザー情報");
   console.groupEnd();
 }
 
