@@ -1,10 +1,9 @@
-import { chromium } from "npm:playwright";
+import { chromium } from "npm:playwright-core";
 
 onmessage = async () => {
   const browser = await chromium.launch({
+    channel: "chrome",
     // headless: false,
-    ignoreDefaultArgs: ["--headless"],
-    args: ["--headless=new"],
   });
   const context = await browser.newContext();
   const page = await context.newPage();

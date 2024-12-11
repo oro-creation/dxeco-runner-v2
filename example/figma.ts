@@ -1,6 +1,6 @@
 import type { AdaptorAccount } from "https://raw.githubusercontent.com/oro-creation/dxeco-runner-v2/main/type.ts";
 import ky from "npm:ky@1.7.3";
-import { chromium } from "npm:playwright";
+import { chromium } from "npm:playwright-core";
 
 // 事前に deno run -A npm:playwright install を実行してください
 
@@ -10,6 +10,7 @@ onmessage = async () => {
   const teamId = "チームIDをここに入力";
 
   const browser = await chromium.launch({
+    channel: "chrome",
     // headless: false,
   });
   const context = await browser.newContext();
