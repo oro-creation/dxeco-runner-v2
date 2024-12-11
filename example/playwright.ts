@@ -1,4 +1,4 @@
-import { chromium } from "npm:playwright-core";
+import { chromium } from "npm:playwright";
 
 onmessage = async () => {
   const browser = await chromium.launch({

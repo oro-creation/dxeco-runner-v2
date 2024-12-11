@@ -1,6 +1,6 @@
 import type { AdaptorAccount } from "https://raw.githubusercontent.com/oro-creation/dxeco-runner-v2/main/type.ts";
 import ky from "npm:ky@1.7.3";
-import { chromium } from "npm:playwright-core";
+import { chromium } from "npm:playwright";
 
 // 事前に deno run -A npm:playwright install を実行してください
 
