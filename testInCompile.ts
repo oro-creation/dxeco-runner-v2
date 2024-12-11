@@ -1,4 +1,8 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
+import {
+  assertEquals,
+  assertRejects,
+  assertStringIncludes,
+} from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
 import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 
@@ -103,7 +107,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
-  console.log("csv");
+  console.group("csv");
   const result = await executeTypeScriptInWorker({
     typeScriptCode: await (
       await fetch(import.meta.resolve("./example/csv.ts"))
@@ -121,7 +125,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
-  console.log("domParser");
+  console.group("domParser");
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
       await fetch(import.meta.resolve("./example/domParser.ts"))
@@ -135,18 +139,32 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
   console.groupEnd();
 }
 
-// GitHub Action 上でのテストが失敗するので一時的にコメントアウト
-// {
-//   console.log("browser");
-//   const result = await executeTypeScriptInWorker<string[]>({
-//     typeScriptCode: await (
-//       await fetch(import.meta.resolve("./example/browser.ts"))
-//     ).text(),
-//     logger: getLogger("browser"),
-//     timeout: 100000,
-//     workerName: "browser",
-//   });
-//   console.log(result);
-//   assertStringIncludes(result.join(","), "現在のユーザー情報");
-//   console.groupEnd();
-// }
+{
+  console.group("browser");
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/browser.ts"))
+    ).text(),
+    logger: getLogger("browser"),
+    timeout: 100000,
+    workerName: "browser",
+  });
+  console.log(result);
+  assertStringIncludes(result.join(","), "現在のユーザー情報");
+  console.groupEnd();
+}
+
+{
+  console.group("playwright");
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/playwright.ts"))
+    ).text(),
+    logger: getLogger("playwright"),
+    timeout: 100000,
+    workerName: "playwright",
+  });
+  console.log(result);
+  assertStringIncludes(result.join(","), "現在のユーザー情報");
+  console.groupEnd();
+}
