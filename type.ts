@@ -96,5 +96,10 @@ export type AdaptorMember = {
   /**
    * カスタムフィールド一覧
    */
-  values?: Record<string, string>;
+  values?: Record<string, CustomFieldValue>;
 };
+
+export type CustomFieldValue =
+  | string
+  | number
+  | null;
