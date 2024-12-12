@@ -1,13 +1,15 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
+import {
+  assertEquals,
+  assertRejects,
+  assertStringIncludes,
+} from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
 import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 
 {
   console.group("default");
   const result = await executeTypeScriptInWorker({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/default.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/default.ts"),
     logger: getLogger("default"),
     timeout: 10000,
     workerName: "default",
@@ -26,9 +28,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
   await assertRejects(
     async () =>
       await executeTypeScriptInWorker({
-        typeScriptCode: await (
-          await fetch(import.meta.resolve("./example/loop.ts"))
-        ).text(),
+        typeScriptCode: await Deno.readTextFile("./example/loop.ts"),
         logger: getLogger("loop"),
         timeout: 10000,
         workerName: "loop",
@@ -44,9 +44,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
   await assertRejects(
     async () =>
       await executeTypeScriptInWorker({
-        typeScriptCode: await (
-          await fetch(import.meta.resolve("./example/throw.ts"))
-        ).text(),
+        typeScriptCode: await Deno.readTextFile("./example/throw.ts"),
         logger: getLogger("throw"),
         timeout: 10000,
         workerName: "throw",
@@ -60,9 +58,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 {
   console.group("fetch");
   const result = await executeTypeScriptInWorker<{ id: number }>({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/fetch.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/fetch.ts"),
     logger: getLogger("fetch"),
     timeout: 10000,
     workerName: "fetch",
@@ -75,9 +71,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 {
   console.group("redaxios");
   const result = await executeTypeScriptInWorker<{ id: number }>({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/redaxios.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/redaxios.ts"),
     logger: getLogger("redaxios"),
     timeout: 10000,
     workerName: "redaxios",
@@ -90,9 +84,7 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 {
   console.group("ky");
   const result = await executeTypeScriptInWorker<{ id: number }>({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/ky.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/ky.ts"),
     logger: getLogger("ky"),
     timeout: 10000,
     workerName: "ky",
@@ -103,11 +95,9 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
-  console.log("csv");
+  console.group("csv");
   const result = await executeTypeScriptInWorker({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/csv.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/csv.ts"),
     logger: getLogger("csv"),
     timeout: 10000,
     workerName: "csv",
@@ -121,11 +111,25 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
-  console.log("domParser");
+  console.group("csvEsm");
+  const result = await executeTypeScriptInWorker({
+    typeScriptCode: await Deno.readTextFile("./example/csvEsm.ts"),
+    logger: getLogger("csvEsm"),
+    timeout: 10000,
+    workerName: "csvEsm",
+  });
+
+  assertEquals(result, [
+    ["a", "b", "c"],
+    ["1", "2", "3"],
+  ]);
+  console.groupEnd();
+}
+
+{
+  console.group("domParser");
   const result = await executeTypeScriptInWorker<string[]>({
-    typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/domParser.ts"))
-    ).text(),
+    typeScriptCode: await Deno.readTextFile("./example/domParser.ts"),
     logger: getLogger("domParser"),
     timeout: 10000,
     workerName: "domParser",
@@ -135,18 +139,17 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
   console.groupEnd();
 }
 
-// GitHub Action 上でのテストが失敗するので一時的にコメントアウト
-// {
-//   console.log("browser");
-//   const result = await executeTypeScriptInWorker<string[]>({
-//     typeScriptCode: await (
-//       await fetch(import.meta.resolve("./example/browser.ts"))
-//     ).text(),
-//     logger: getLogger("browser"),
-//     timeout: 100000,
-//     workerName: "browser",
-//   });
-//   console.log(result);
-//   assertStringIncludes(result.join(","), "現在のユーザー情報");
-//   console.groupEnd();
-// }
+{
+  console.group("browser");
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await Deno.readTextFile(
+      `./example/${Deno.build.os === "windows" ? "astral" : "playwright"}.ts`,
+    ),
+    logger: getLogger("browser"),
+    timeout: 100000,
+    workerName: "browser",
+  });
+  console.log(result);
+  assertStringIncludes(result.join(","), "現在のユーザー情報");
+  console.groupEnd();
+}

@@ -1,4 +1,8 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
+import {
+  assertEquals,
+  assertRejects,
+  assertStringIncludes,
+} from "jsr:@std/assert";
 import { getLogger } from "jsr:@std/log";
 import { join } from "jsr:@std/url";
 import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
@@ -65,23 +69,6 @@ Deno.test("fetch", async () => {
   assertEquals(result.id, 1);
 });
 
-// Deno.test("permission net", async () => {
-//   await assertRejects(
-//     async () =>
-//       await executeTypeScriptInWorker<{ id: number }>({
-//         typeScriptCode: await (
-//           await fetch(import.meta.resolve("./example/fetch.ts"))
-//         ).text(),
-//         logger: getLogger("permission net"),
-//         timeout: 10000,
-//         workerName: "permission net",
-//         permission: {},
-//       }),
-//     Error,
-//     "PermissionDenied",
-//   );
-// });
-
 Deno.test("redaxios", async () => {
   const result = await executeTypeScriptInWorker<{ id: number }>({
     typeScriptCode: await (
@@ -124,6 +111,22 @@ Deno.test("csv", async () => {
   ]);
 });
 
+Deno.test("csvEsm", async () => {
+  const result = await executeTypeScriptInWorker({
+    typeScriptCode: await (
+      await fetch(import.meta.resolve("./example/csvEsm.ts"))
+    ).text(),
+    logger: getLogger("csvEsm"),
+    timeout: 10000,
+    workerName: "csvEsm",
+  });
+
+  assertEquals(result, [
+    ["a", "b", "c"],
+    ["1", "2", "3"],
+  ]);
+});
+
 Deno.test("domParser", async () => {
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
@@ -137,31 +140,28 @@ Deno.test("domParser", async () => {
   assertEquals(result[0], "dom-parser");
 });
 
-// GitHub Action 上でのテストが失敗するので一時的にコメントアウト
-// Deno.test("browser", async () => {
-//   const result = await executeTypeScriptInWorker<string[]>({
-//     typeScriptCode: await (
-//       await fetch(import.meta.resolve("./example/browser.ts"))
-//     ).text(),
-//     logger: getLogger("browser"),
-//     timeout: 100000,
-//     workerName: "browser",
-//     permission: {
-//       env: true,
-//       hrtime: false,
-//       net: true,
-//       ffi: false,
-//       sys: false,
-//       read: true,
-//       run: true,
-//       write: true,
-//     },
-//   });
+Deno.test("browser", async () => {
+  const result = await executeTypeScriptInWorker<string[]>({
+    typeScriptCode: await (
+      await fetch(
+        // https://github.com/denoland/deno/issues/16899
+        // Windows では Playwright が動かないため, Astral を使う
+        import.meta.resolve(
+          `./example/${
+            Deno.build.os === "windows" ? "astral" : "playwright"
+          }.ts`,
+        ),
+      )
+    ).text(),
+    logger: getLogger("browser"),
+    timeout: 100000,
+    workerName: "browser",
+  });
 
-//   console.log(result);
+  console.log(result);
 
-//   assertStringIncludes(result.join(","), "現在のユーザー情報");
-// });
+  assertStringIncludes(result.join(","), "現在のユーザー情報");
+});
 
 Deno.test("url base", () => {
   assertEquals(

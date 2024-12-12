@@ -1,4 +1,4 @@
-import { launch } from "https://esm.sh/jsr/@astral/astral@0.3.6";
+import { launch } from "jsr:@astral/astral@0.4.9";
 
 onmessage = async () => {
   const browser = await launch({

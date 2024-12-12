@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
+      - run: deno run -A npm:playwright install
       - run: deno compile -A --output exeFile ./testInCompile.ts
       - run: ./exeFile
 
@@ -25,5 +26,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
+      - run: deno run -A npm:playwright install
       - run: deno task test
-      - run: deno run -A ./testInCompile.ts
