@@ -140,12 +140,14 @@ import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 }
 
 {
-  console.group("playwright");
+  console.group("browser");
   const result = await executeTypeScriptInWorker<string[]>({
-    typeScriptCode: await Deno.readTextFile("./example/playwright.ts"),
-    logger: getLogger("playwright"),
+    typeScriptCode: await Deno.readTextFile(
+      `./example/${Deno.build.os === "windows" ? "astral" : "playwright"}.ts`,
+    ),
+    logger: getLogger("browser"),
     timeout: 100000,
-    workerName: "playwright",
+    workerName: "browser",
   });
   console.log(result);
   assertStringIncludes(result.join(","), "現在のユーザー情報");

@@ -8,7 +8,7 @@ onmessage = async () => {
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("https://api.dxeco.io/docs");
-  page.locator('input[aria-label="Search"]').fill("auth");
+  await page.locator('input[aria-label="Search"]').fill("auth");
   await page.waitForSelector('[data-role="search:results"] li');
 
   postMessage(

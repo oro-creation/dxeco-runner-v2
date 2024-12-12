@@ -140,14 +140,22 @@ Deno.test("domParser", async () => {
   assertEquals(result[0], "dom-parser");
 });
 
-Deno.test("playwright", async () => {
+Deno.test("browser", async () => {
   const result = await executeTypeScriptInWorker<string[]>({
     typeScriptCode: await (
-      await fetch(import.meta.resolve("./example/playwright.ts"))
+      await fetch(
+        // https://github.com/denoland/deno/issues/16899
+        // Windows では Playwright が動かないため, Astral を使う
+        import.meta.resolve(
+          `./example/${
+            Deno.build.os === "windows" ? "astral" : "playwright"
+          }.ts`,
+        ),
+      )
     ).text(),
-    logger: getLogger("playwright"),
+    logger: getLogger("browser"),
     timeout: 100000,
-    workerName: "playwright",
+    workerName: "browser",
   });
 
   console.log(result);
