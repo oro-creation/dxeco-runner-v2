@@ -103,3 +103,132 @@ export type CustomFieldValue =
   | string
   | number
   | null;
+
+/**
+ * IT資産マスタ
+ */
+export type AdaptorAssetMaster = {
+  /**
+   * MDMツールデバイスIDフィールド
+   */
+  fieldMdmToolDeviceId: string;
+
+  /**
+   * カスタムフィールド一覧
+   */
+  fields: ReadonlyArray<AdaptorCustomField>;
+
+  /**
+   * アセット一覧
+   */
+  assets: ReadonlyArray<AdaptorAsset>;
+};
+
+export type AdaptorCustomField =
+  & {
+    /**
+     * コード
+     */
+    code: string;
+
+    /**
+     * 名前
+     */
+    name: string;
+  }
+  & (
+    | {
+      /**
+       * 種類
+       */
+      type:
+        | "Text"
+        | "MultipleText"
+        | "Date"
+        | "DateSpan"
+        | "Number"
+        | "MemberEmail"
+        | "Email"
+        | "Currency";
+    }
+    | {
+      /**
+       * 種類
+       */
+      type: "Option";
+
+      /**
+       * 選択肢
+       */
+      options: string[];
+    }
+    | {
+      /**
+       * 種類
+       */
+      type: "Status";
+
+      /**
+       * ステータス一覧
+       */
+      statuses: CustomFieldStatus[];
+    }
+    | {
+      type: "DueDate";
+      /**
+       * 警告表示前日数
+       */
+      numberOfDaysBeforeWarning: number;
+    }
+  );
+
+export type CustomFieldStatus = {
+  /**
+   * コード
+   */
+  code: string;
+
+  /**
+   * ステータス名
+   */
+  name: string;
+
+  /**
+   * 色
+   */
+  color?: string;
+};
+
+/**
+ * IT資産
+ */
+export type AdaptorAsset<
+  Values extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  /**
+   * 識別子
+   */
+  identifier: string;
+
+  /**
+   * メールアドレス
+   */
+  email?: string;
+
+  /**
+   * カスタムフィールド
+   */
+  values: Values;
+};
+
+export type CustomFieldToTsType<T extends AdaptorCustomField> = T extends {
+  type: "Option";
+  options: infer O extends ReadonlyArray<string>;
+} ? O[number]
+  : T extends {
+    type: "Status";
+    statuses?: ReadonlyArray<infer S extends CustomFieldStatus>;
+  } ? S["code"]
+  : T extends { type: "Currency" | "Number" } ? number
+  : T extends { type: "File" | "MultipleFile" } ? never
+  : string;
