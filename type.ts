@@ -207,11 +207,6 @@ export type AdaptorAsset<
   Values extends Record<string, unknown> = Record<string, unknown>,
 > = {
   /**
-   * 識別子
-   */
-  identifier: string;
-
-  /**
    * メールアドレス
    */
   email?: string;
