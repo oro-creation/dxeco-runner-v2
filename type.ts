@@ -102,6 +102,7 @@ export type AdaptorMember = {
 export type CustomFieldValue =
   | string
   | number
+  | Date
   | null;
 
 /**
@@ -221,14 +222,16 @@ export type AdaptorAsset<
   values: Values;
 };
 
-export type CustomFieldToTsType<T extends AdaptorCustomField> = T extends {
-  type: "Option";
-  options: infer O extends ReadonlyArray<string>;
-} ? O[number]
+export type CustomFieldToTsType<T extends AdaptorCustomField> = T extends
+  { type: "Text" | "MultipleText" | "MemberEmail" | "Email" } ? string
+  : T extends { type: "Date" | "DateSpan" | "DueDate" } ? Date
+  : T extends { type: "Currency" | "Number" } ? number
+  : T extends {
+    type: "Option";
+    options: ReadonlyArray<infer O extends string>;
+  } ? O
   : T extends {
     type: "Status";
-    statuses?: ReadonlyArray<infer S extends CustomFieldStatus>;
+    statuses: ReadonlyArray<infer S extends CustomFieldStatus>;
   } ? S["code"]
-  : T extends { type: "Currency" | "Number" } ? number
-  : T extends { type: "File" | "MultipleFile" } ? never
-  : string;
+  : never;
