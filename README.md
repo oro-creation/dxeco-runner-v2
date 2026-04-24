@@ -36,3 +36,4 @@ deno run --allow-net=api.dxeco.io --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS --a
 
 また権限が必要になったタイミングで権限を許可するかの聞かれます. y
 と答えることで許可をすることができます
+
