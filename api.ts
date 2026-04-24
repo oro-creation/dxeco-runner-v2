@@ -1,5 +1,5 @@
-import { Logger } from "jsr:@std/log";
-import ky from "npm:ky";
+import { Logger } from "jsr:@std/log@0.224.11";
+import ky from "npm:ky@1.7.3";
 
 /**
  * 現在のユーザー情報

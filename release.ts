@@ -1,6 +1,6 @@
 import { Command } from "jsr:@cliffy/command@1.0.0-rc.4";
 import { exec } from "npm:@actions/exec";
-import ky from "npm:ky";
+import ky from "npm:ky@1.7.3";
 
 /**
  * https://docs.github.com/ja/rest/releases/assets?apiVersion=2022-11-28#list-release-assets
