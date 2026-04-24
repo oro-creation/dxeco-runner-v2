@@ -1,8 +1,8 @@
-import { LoadResponse } from "jsr:@deno/cache-dir";
-import { bundle } from "jsr:@deno/emit";
-import { delay } from "jsr:@std/async";
-import { encodeBase64 } from "jsr:@std/encoding/base64";
-import { getLogger, Logger } from "jsr:@std/log";
+import { LoadResponse } from "jsr:@deno/cache-dir@0.14.0";
+import { bundle } from "jsr:@deno/emit@0.46.0";
+import { delay } from "jsr:@std/async@1.0.9";
+import { encodeBase64 } from "jsr:@std/encoding@1.0.5/base64";
+import { getLogger, Logger } from "jsr:@std/log@0.224.11";
 import {
   activateRunner,
   getCurrentUser,

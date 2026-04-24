@@ -2,8 +2,8 @@ import {
   assertEquals,
   assertRejects,
   assertStringIncludes,
-} from "jsr:@std/assert";
-import { getLogger } from "jsr:@std/log";
+} from "jsr:@std/assert@0.223.0";
+import { getLogger } from "jsr:@std/log@0.224.11";
 import { executeTypeScriptInWorker, TimeoutError } from "./mod.ts";
 
 {
