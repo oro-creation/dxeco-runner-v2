@@ -45,6 +45,24 @@ export type AdaptorAccount = {
    * タグ名一覧
    */
   tagNames?: string[];
+
+  /**
+   * カスタムフィールド値
+   * キーはカスタムフィールドコード
+   */
+  values?: Record<string, CustomFieldValue>;
+};
+
+export type AccountAdaptorResult = {
+  /**
+   * カスタムフィールド定義一覧（任意）
+   */
+  fields?: ReadonlyArray<AdaptorCustomField>;
+
+  /**
+   * アカウント一覧
+   */
+  accounts: ReadonlyArray<AdaptorAccount>;
 };
 
 export type AdaptorMember = {
